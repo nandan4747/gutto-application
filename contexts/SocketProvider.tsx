@@ -1,7 +1,7 @@
 import { createContext, useState, useEffect, useContext } from "react";
 import { useAuth } from "./AuthProvider";
 import { io, Socket } from "socket.io-client";
-import { API_DETAILS, BASE_URL } from "../src/api/API_DETAILS";
+import { BASE_URL } from "../src/api/API_DETAILS";
 
 const SocketContext = createContext<Socket | null>(null);
 

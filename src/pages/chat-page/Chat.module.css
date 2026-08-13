@@ -1,0 +1,86 @@
+/* ---------- Layout shells ---------- */
+
+.chatPage {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+}
+
+.sidebarPane {
+  width: 300px;
+  max-width: 380px;
+  flex-shrink: 0;
+
+  height: 100%;
+  overflow-y: auto;
+  border-right: 1px solid #2d2d2d;
+}
+
+.chatPane {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.loadingScreen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+
+  font-size: 14px;
+}
+
+.emptyState {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ---------- Mobile back button (hidden on desktop) ---------- */
+
+.backButton {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 12px;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* ---------- Mobile behavior ---------- */
+/* Below this width: show ONLY the sidebar by default, and ONLY the chat
+   pane once a conversation is selected (via the .conversationSelected
+   modifier on .chatPage). This mirrors WhatsApp Web / Telegram's mobile
+   layout instead of cramming both panes side by side on a small screen. */
+
+@media (max-width: 768px) {
+  .sidebarPane {
+    max-width: 100%;
+    width: 100%;
+    border-right: none;
+  }
+
+  .chatPane {
+    display: none;
+  }
+
+  .backButton {
+    display: flex;
+  }
+
+  .chatPage.conversationSelected .sidebarPane {
+    display: none;
+  }
+
+  .chatPage.conversationSelected .chatPane {
+    display: flex;
+    width: 100%;
+  }
+}

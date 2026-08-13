@@ -4,7 +4,7 @@ import type { LoginData, RegisterData } from "./types";
 import styles from "./Auth.module.css";
 import { useAuth } from "../../../contexts/AuthProvider";
 import { useNavigate } from "react-router-dom";
-
+import { colorScheme } from "../../theme/colorScheme";
 export default function Auth() {
   const navigate = useNavigate();
   const [mode, setMode] = useState<"login" | "register">("login");
@@ -68,11 +68,30 @@ export default function Auth() {
   };
 
   return (
-    <div className={styles.authPage}>
-      <div className={styles.authCard}>
-        <div className={styles.authToggle}>
+    <div
+      style={{
+        backgroundColor: colorScheme.background,
+        color: colorScheme.text,
+      }}
+      className={styles.authPage}
+    >
+      <div
+        style={{ backgroundColor: colorScheme.backgroundSecondary }}
+        className={styles.authCard}
+      >
+        <div
+          style={{ backgroundColor: colorScheme.backgroundSecondary }}
+          className={styles.authToggle}
+        >
           <button
             type="button"
+            style={{
+              backgroundColor:
+                mode === "login"
+                  ? colorScheme.primary
+                  : colorScheme.backgroundSecondary,
+              color: mode === "login" ? colorScheme.text : colorScheme.text,
+            }}
             className={mode === "login" ? styles.active : ""}
             onClick={() => {
               setMode("login");
@@ -82,6 +101,13 @@ export default function Auth() {
             Login
           </button>
           <button
+            style={{
+              backgroundColor:
+                mode === "register"
+                  ? colorScheme.primary
+                  : colorScheme.backgroundSecondary,
+              color: mode === "register" ? colorScheme.text : colorScheme.text,
+            }}
             type="button"
             className={mode === "register" ? styles.active : ""}
             onClick={() => {
@@ -93,11 +119,23 @@ export default function Auth() {
           </button>
         </div>
 
-        <form className={styles.authForm} onSubmit={handleSubmit}>
+        <form
+          style={{ backgroundColor: colorScheme.backgroundSecondary }}
+          className={styles.authForm}
+          onSubmit={handleSubmit}
+        >
           {mode === "register" && (
-            <div className={styles.formField}>
+            <div
+              style={{ backgroundColor: colorScheme.backgroundSecondary }}
+              className={styles.formField}
+            >
               <label htmlFor="fullname">Full Name</label>
               <input
+                style={{
+                  backgroundColor: colorScheme.backgroundTertiary,
+                  color: colorScheme.text,
+                  borderColor: colorScheme.border,
+                }}
                 id="fullname"
                 type="text"
                 value={fullname}
@@ -111,6 +149,11 @@ export default function Auth() {
           <div className={styles.formField}>
             <label htmlFor="username">Username</label>
             <input
+              style={{
+                backgroundColor: colorScheme.backgroundTertiary,
+                color: colorScheme.text,
+                borderColor: colorScheme.border,
+              }}
               id="username"
               type="text"
               value={username}
@@ -123,6 +166,11 @@ export default function Auth() {
           <div className={styles.formField}>
             <label htmlFor="password">Password</label>
             <input
+              style={{
+                backgroundColor: colorScheme.backgroundTertiary,
+                color: colorScheme.text,
+                borderColor: colorScheme.border,
+              }}
               id="password"
               type="password"
               value={password}
@@ -133,10 +181,18 @@ export default function Auth() {
           </div>
 
           {mode === "register" && (
-            <div className={`${styles.formField} ${styles.accountTypeGroup}`}>
+            <div
+              style={{ backgroundColor: colorScheme.backgroundTertiary }}
+              className={`${styles.formField} ${styles.accountTypeGroup}`}
+            >
               <span>Account type</span>
-              <label>
+              <label style={{ color: colorScheme.textSecondary }}>
                 <input
+                  style={{
+                    backgroundColor: colorScheme.backgroundTertiary,
+                    color: colorScheme.text,
+                    borderColor: colorScheme.border,
+                  }}
                   type="radio"
                   name="accountType"
                   value="private"
@@ -145,8 +201,13 @@ export default function Auth() {
                 />
                 Private
               </label>
-              <label>
+              <label style={{ color: colorScheme.textSecondary }}>
                 <input
+                  style={{
+                    backgroundColor: colorScheme.backgroundTertiary,
+                    color: colorScheme.text,
+                    borderColor: colorScheme.border,
+                  }}
                   type="radio"
                   name="accountType"
                   value="public"
