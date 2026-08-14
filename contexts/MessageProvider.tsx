@@ -78,6 +78,10 @@ type Action =
   | {
       type: "LOAD_HISTORY";
       payload: { conversationId: string; messages: StoredMessage[] };
+    }
+  | {
+      type: "PREPEND_HISTORY";
+      payload: { conversationId: string; messages: StoredMessage[] };
     };
 
 // ---------- Reducer ----------
@@ -226,6 +230,25 @@ function messageReducer(state: MessageState, action: Action): MessageState {
       };
     }
 
+    case "PREPEND_HISTORY": {
+      // Used for "scroll up to load older messages" — adds an older page
+      // to the FRONT of the list without touching what's already loaded.
+      const { conversationId, messages } = action.payload;
+      const existing = state[conversationId];
+      if (!existing) return state;
+
+      const existingIds = new Set(existing.messageList.map((m) => m.messageId));
+      const newOnes = messages.filter((m) => !existingIds.has(m.messageId));
+
+      return {
+        ...state,
+        [conversationId]: {
+          ...existing,
+          messageList: [...newOnes, ...existing.messageList],
+        },
+      };
+    }
+
     default:
       return state;
   }
@@ -259,6 +282,7 @@ interface MessageContextValue {
   markMessageFailed: (conversationId: string, tempId: string) => void;
   markConversationRead: (conversationId: string) => void;
   loadHistory: (conversationId: string, messages: StoredMessage[]) => void;
+  prependHistory: (conversationId: string, messages: StoredMessage[]) => void;
   setActiveConversation: (conversationId: string | null) => void;
 }
 
@@ -352,6 +376,16 @@ export function MessageProvider({ children }: { children: ReactNode }) {
     [],
   );
 
+  const prependHistory = useCallback(
+    (conversationId: string, messages: StoredMessage[]) => {
+      dispatch({
+        type: "PREPEND_HISTORY",
+        payload: { conversationId, messages },
+      });
+    },
+    [],
+  );
+
   return (
     <MessageContext.Provider
       value={{
@@ -365,6 +399,7 @@ export function MessageProvider({ children }: { children: ReactNode }) {
         markMessageFailed,
         markConversationRead,
         loadHistory,
+        prependHistory,
         setActiveConversation,
       }}
     >

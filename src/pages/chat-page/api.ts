@@ -40,8 +40,16 @@ export const markAsRead = async (senderId: string) => {
 };
 
 // GET /api/chat/:senderId
-export const getChatHistory = async (senderId: string) => {
-  const res = await fetch(`${BASE}/${senderId}`, {
+export const getChatHistory = async (
+  senderId: string,
+  opts?: { cursor?: string | null; limit?: number },
+) => {
+  const params = new URLSearchParams();
+  if (opts?.cursor) params.set("cursor", opts.cursor);
+  if (opts?.limit) params.set("limit", String(opts.limit));
+
+  const qs = params.toString();
+  const res = await fetch(`${BASE}/${senderId}${qs ? `?${qs}` : ""}`, {
     credentials: "include",
   });
   return handle(res);

@@ -57,18 +57,20 @@ export function normalizeUnreadCounts(
   }));
 }
 
-/**
- * Matches getChatHistory() in chatServices.ts — raw Message documents:
- * [{ _id, senderUserId, reciverUserId, text, type, url, isReaded, createdAt }, ...]
- */
-export function normalizeChatHistory(raw: any[]): StoredMessage[] {
-  return raw.map((m) => ({
-    messageId: m._id,
-    text: m.text,
-    type: m.type ?? "text",
-    url: m.url,
-    senderId: m.senderUserId,
-    createdAt: m.createdAt,
-    status: "sent",
-  }));
+export function normalizeChatHistoryPage(raw: {
+  messages: any[];
+  nextCursor: string | null;
+}): { messages: StoredMessage[]; nextCursor: string | null } {
+  return {
+    messages: raw.messages.map((m) => ({
+      messageId: m._id,
+      text: m.text,
+      type: m.type ?? "text",
+      url: m.url,
+      senderId: m.senderUserId,
+      createdAt: m.createdAt,
+      status: "sent",
+    })),
+    nextCursor: raw.nextCursor,
+  };
 }
