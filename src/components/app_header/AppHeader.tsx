@@ -2,9 +2,18 @@ import React from "react";
 import styles from "./AppHeader.module.css";
 import AppLogo from "../../assets/applogo.png";
 import { colorScheme } from "../../theme/colorScheme";
-import { BookUser, Users } from "lucide-react";
+import { BookUser, Users, MessageCircle } from "lucide-react";
+import { useNavigationView } from "../../../contexts/Navigationprovider";
 
 const AppHeader: React.FC = () => {
+  const { activeView, setActiveView } = useNavigationView();
+
+  const navItemStyle = (view: typeof activeView) => ({
+    background: activeView === view ? colorScheme.selected : "transparent",
+    cursor: "pointer",
+    borderRadius: 8,
+  });
+
   return (
     <div
       style={{
@@ -18,7 +27,25 @@ const AppHeader: React.FC = () => {
         <h1 className={styles.appName}>GUTTO</h1>
       </div>
 
-      <div className={styles.navActions}>
+      <div
+        className={styles.navActions}
+        style={navItemStyle("chats")}
+        onClick={() => setActiveView("chats")}
+      >
+        <MessageCircle className={styles.navOptions} size={24} />
+        <p
+          className={styles.nav_label}
+          style={{ color: colorScheme.textSecondary }}
+        >
+          Chats
+        </p>
+      </div>
+
+      <div
+        className={styles.navActions}
+        style={navItemStyle("friends")}
+        onClick={() => setActiveView("friends")}
+      >
         <BookUser className={styles.navOptions} size={24} />
         <p
           className={styles.nav_label}
@@ -28,7 +55,11 @@ const AppHeader: React.FC = () => {
         </p>
       </div>
 
-      <div className={styles.navActions}>
+      <div
+        className={styles.navActions}
+        style={navItemStyle("groups")}
+        onClick={() => setActiveView("groups")}
+      >
         <Users className={styles.navOptions} size={24} />
         <p
           className={styles.nav_label}

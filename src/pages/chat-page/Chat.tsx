@@ -12,12 +12,15 @@ import ConversationList from "./components/Conversationlist";
 import ChatWindow from "./components/ChatWindow";
 import styles from "./Chat.module.css";
 import { colorScheme } from "../../theme/colorScheme";
+import { useNavigationView } from "../../../contexts/Navigationprovider";
+import FriendsPanel from "../freinds-pages/Friendspanel";
 
 export default function Chat() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { hydrateConversations, applyUnreadCounts } = useMessages();
   const { sendMessage } = useChatSocket();
+  const { activeView } = useNavigationView();
 
   const [selectedConversationId, setSelectedConversationId] = useState<
     string | null
@@ -62,9 +65,13 @@ export default function Chat() {
 
   // On mobile, this class flips the layout to show only the chat pane
   // instead of both panes at once (see .conversationSelected in the CSS).
+  // Only relevant when we're actually looking at a DM/group conversation —
+  // the Friends panel doesn't have a "chat pane" counterpart to expand into.
   const pageClassName = [
     styles.chatPage,
-    selectedConversationId ? styles.conversationSelected : "",
+    activeView === "chats" && selectedConversationId
+      ? styles.conversationSelected
+      : "",
   ]
     .filter(Boolean)
     .join(" ");
@@ -78,20 +85,14 @@ export default function Chat() {
       className={pageClassName}
     >
       <div className={styles.sidebarPane}>
-        <p
-          style={{
-            padding: 10,
-            fontSize: "large",
-            fontWeight: 600,
-            color: colorScheme.textSecondary,
-          }}
-        >
-          FREINDS
-        </p>
-        <ConversationList
-          selectedConversationId={selectedConversationId}
-          onSelect={setSelectedConversationId}
-        />
+        {activeView === "friends" ? (
+          <FriendsPanel />
+        ) : (
+          <ConversationList
+            selectedConversationId={selectedConversationId}
+            onSelect={setSelectedConversationId}
+          />
+        )}
       </div>
       <div className={styles.chatPane}>
         <ChatWindow

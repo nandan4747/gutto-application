@@ -5,14 +5,17 @@ import App from "./App.tsx";
 import { AuthProvider } from "../contexts/AuthProvider.tsx";
 import { SocketProvider } from "../contexts/SocketProvider.tsx";
 import { MessageProvider } from "../contexts/MessageProvider.tsx";
+import { NavigationProvider } from "../contexts/Navigationprovider.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <AuthProvider>
     <SocketProvider>
       <MessageProvider>
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
+        <NavigationProvider>
+          <BrowserRouter>
+            <App />
+          </BrowserRouter>
+        </NavigationProvider>
       </MessageProvider>
     </SocketProvider>
   </AuthProvider>,
