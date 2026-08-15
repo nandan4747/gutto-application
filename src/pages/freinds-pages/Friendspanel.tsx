@@ -5,7 +5,9 @@ import { getConnections, getPendingRequests } from "./api";
 import FriendCard from "./components/Friendcard";
 import AddFriendPanel from "./components/Addfriendpanel";
 import PendingRequestsPanel from "./components/PendingRequestsPanel";
+import BlockedUsersPanel from "./components/BlockedUsersPanel";
 import styles from "./FriendsPanel.module.css";
+import { useConversation } from "../../../contexts/ConversationContext";
 
 interface Connection {
   _id: string;
@@ -20,9 +22,10 @@ interface PendingRequest {
   createdAt: string;
 }
 
-type Tab = "friends" | "requests";
+type Tab = "friends" | "requests" | "blocked";
 
 export default function FriendsPanel() {
+  const { blockedUsers, setBlockedUsers } = useConversation();
   const [connections, setConnections] = useState<Connection[]>([]);
   const [pendingRequests, setPendingRequests] = useState<PendingRequest[]>([]);
   const [loading, setLoading] = useState(true);
@@ -73,6 +76,12 @@ export default function FriendsPanel() {
         .then(setConnections)
         .catch((err) => console.error("Failed to refresh connections:", err));
     }
+  };
+
+  const handleUnblocked = (userId: string) => {
+    setBlockedUsers((prev) => prev.filter((u) => u._id !== userId));
+    // The user might also want to reload connections if they become friends again,
+    // but unblocking doesn't add to connections automatically.
   };
 
   if (isAdding) {
@@ -130,6 +139,20 @@ export default function FriendsPanel() {
             <span className={styles.badge}>{pendingRequests.length}</span>
           )}
         </button>
+        <button
+          className={styles.tabButton}
+          style={{
+            color:
+              activeTab === "blocked"
+                ? colorScheme.text
+                : colorScheme.textSecondary,
+            borderBottomColor:
+              activeTab === "blocked" ? "#0a84ff" : "transparent",
+          }}
+          onClick={() => setActiveTab("blocked")}
+        >
+          Blocked
+        </button>
       </div>
 
       {activeTab === "friends" && (
@@ -169,6 +192,15 @@ export default function FriendsPanel() {
           loading={loading}
           error={error}
           onResolved={handleRequestResolved}
+        />
+      )}
+
+      {activeTab === "blocked" && (
+        <BlockedUsersPanel
+          users={blockedUsers}
+          loading={loading}
+          error={error}
+          onUnblocked={handleUnblocked}
         />
       )}
     </div>

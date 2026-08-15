@@ -14,6 +14,8 @@ import styles from "./Chat.module.css";
 import { colorScheme } from "../../theme/colorScheme";
 import { useNavigationView } from "../../../contexts/Navigationprovider";
 import FriendsPanel from "../freinds-pages/Friendspanel";
+import { useConversation } from "../../../contexts/ConversationContext";
+import ProfilePanel from "../freinds-pages/components/ProfilePanel";
 
 export default function Chat() {
   const navigate = useNavigate();
@@ -21,10 +23,12 @@ export default function Chat() {
   const { hydrateConversations, applyUnreadCounts } = useMessages();
   const { sendMessage } = useChatSocket();
   const { activeView } = useNavigationView();
+  const {
+    selectedConversationId,
+    setSelectedConversationId,
+    selectedUserProfile,
+  } = useConversation();
 
-  const [selectedConversationId, setSelectedConversationId] = useState<
-    string | null
-  >(null);
   const [initialLoading, setInitialLoading] = useState(true);
 
   useEffect(() => {
@@ -69,7 +73,8 @@ export default function Chat() {
   // the Friends panel doesn't have a "chat pane" counterpart to expand into.
   const pageClassName = [
     styles.chatPage,
-    activeView === "chats" && selectedConversationId
+    (activeView === "chats" && selectedConversationId) ||
+    (activeView === "friends" && selectedUserProfile)
       ? styles.conversationSelected
       : "",
   ]
@@ -95,11 +100,15 @@ export default function Chat() {
         )}
       </div>
       <div className={styles.chatPane}>
-        <ChatWindow
-          conversationId={selectedConversationId}
-          onSendMessage={sendMessage}
-          onBack={() => setSelectedConversationId(null)}
-        />
+        {activeView === "friends" && selectedUserProfile ? (
+          <ProfilePanel />
+        ) : (
+          <ChatWindow
+            conversationId={selectedConversationId}
+            onSendMessage={sendMessage}
+            onBack={() => setSelectedConversationId(null)}
+          />
+        )}
       </div>
     </div>
   );

@@ -64,3 +64,38 @@ export const rejectFriendRequest = async (requestId: string) => {
   });
   return handle(res);
 };
+
+// POST /api/user/unfriend?targetId=
+export const unfriendUser = async (targetId: string) => {
+  const res = await fetch(`${BASE}/unfriend?targetId=${encodeURIComponent(targetId)}`, {
+    method: "POST",
+    credentials: "include",
+  });
+  return handle(res);
+};
+
+// POST /api/user/block?targetId=
+export const blockUser = async (targetId: string) => {
+  const res = await fetch(`${BASE}/block?targetId=${encodeURIComponent(targetId)}`, {
+    method: "POST",
+    credentials: "include",
+  });
+  return handle(res);
+};
+
+// POST /api/user/unblock?targetId=
+export const unblockUser = async (targetId: string) => {
+  const res = await fetch(`${BASE}/unblock?targetId=${encodeURIComponent(targetId)}`, {
+    method: "POST",
+    credentials: "include",
+  });
+  return handle(res);
+};
+
+// GET /api/user/blocked
+export const getBlockedUsers = async () => {
+  const res = await fetch(`${BASE}/blocked`, {
+    credentials: "include",
+  });
+  return handle(res);
+};
