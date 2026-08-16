@@ -5,6 +5,7 @@ import { normalizeChatHistoryPage } from "../utils/normalize";
 import MessageBubble from "./MessageBubble";
 import MessageInput from "./MessageInput";
 import styles from "../Chat.module.css";
+import { useConnectedPeople } from "../../../../contexts/RelationProvider";
 
 import { Avatar } from "../../../components/avatart_genrator/Avatar";
 import { colorScheme } from "../../../theme/colorScheme";
@@ -48,6 +49,7 @@ export default function ChatWindow({
   const paginationRef = useRef<Record<string, PaginationState>>({});
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const { getConnection } = useConnectedPeople();
 
   useEffect(() => {
     setActiveConversation(conversationId);
@@ -148,10 +150,17 @@ export default function ChatWindow({
   }
 
   const entry = state[conversationId];
-  const displayName =
+  let displayName =
     entry?.type === "dm"
       ? (entry.participant?.fullname ?? entry.participant?.username)
       : entry?.groupInfo?.name;
+
+  console.log(`display name : ${displayName}`);
+  if (!displayName) {
+    console.log("getting details by connection context");
+    const connection = getConnection(conversationId);
+    displayName = connection?.fullname ?? connection?.username;
+  }
 
   return (
     <>

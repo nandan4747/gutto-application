@@ -8,13 +8,7 @@ import PendingRequestsPanel from "./components/PendingRequestsPanel";
 import BlockedUsersPanel from "./components/BlockedUsersPanel";
 import styles from "./FriendsPanel.module.css";
 import { useConversation } from "../../../contexts/ConversationContext";
-
-interface Connection {
-  _id: string;
-  username: string;
-  fullname: string;
-  accountType: string;
-}
+import { useConnectedPeople } from "../../../contexts/RelationProvider";
 
 interface PendingRequest {
   _id: string;
@@ -26,7 +20,7 @@ type Tab = "friends" | "requests" | "blocked";
 
 export default function FriendsPanel() {
   const { blockedUsers, setBlockedUsers } = useConversation();
-  const [connections, setConnections] = useState<Connection[]>([]);
+  const { connections, setConnections } = useConnectedPeople();
   const [pendingRequests, setPendingRequests] = useState<PendingRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -34,8 +28,6 @@ export default function FriendsPanel() {
   const [isAdding, setIsAdding] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>("friends");
 
-  // Fetch both on mount — pending count is needed for the tab badge
-  // regardless of which tab is currently active.
   const loadAll = useCallback(async () => {
     setLoading(true);
     try {
@@ -43,7 +35,9 @@ export default function FriendsPanel() {
         getConnections(),
         getPendingRequests(),
       ]);
-      setConnections(connectionsData);
+      // CHANGED: Map keyed by _id instead of a Set — see RelationProvider
+      // for why (correct dedup + O(1) lookup for group chat name resolution).
+      setConnections(new Map(connectionsData.map((c: any) => [c._id, c])));
       setPendingRequests(requestsData.requests ?? []);
       setError(null);
     } catch (err: any) {
@@ -57,7 +51,10 @@ export default function FriendsPanel() {
     loadAll();
   }, [loadAll]);
 
-  const filtered = connections.filter((c) => {
+  // CHANGED: Array.from(connections.values()) instead of Array.from(connections)
+  // — Map iterates as [key, value] pairs by default, .values() gives us
+  // just the Connection objects, same as before.
+  const filtered = Array.from(connections.values()).filter((c) => {
     const term = searchTerm.trim().toLowerCase();
     if (!term) return true;
     return (
@@ -69,19 +66,16 @@ export default function FriendsPanel() {
   const handleRequestResolved = (requestId: string, accepted: boolean) => {
     setPendingRequests((prev) => prev.filter((r) => r._id !== requestId));
     if (accepted) {
-      // A newly-accepted request means a new connection now exists on
-      // the backend — refetch so it shows up under the Friends tab
-      // without the user needing to manually refresh.
       getConnections()
-        .then(setConnections)
+        .then((data: any[]) =>
+          setConnections(new Map(data.map((c) => [c._id, c]))),
+        )
         .catch((err) => console.error("Failed to refresh connections:", err));
     }
   };
 
   const handleUnblocked = (userId: string) => {
     setBlockedUsers((prev) => prev.filter((u) => u._id !== userId));
-    // The user might also want to reload connections if they become friends again,
-    // but unblocking doesn't add to connections automatically.
   };
 
   if (isAdding) {
@@ -176,7 +170,7 @@ export default function FriendsPanel() {
             {error && <p className={styles.errorText}>{error}</p>}
             {!loading && !error && filtered.length === 0 && (
               <p className={styles.emptyText}>
-                {connections.length === 0 ? "No friends yet" : "No matches"}
+                {connections.size === 0 ? "No friends yet" : "No matches"}
               </p>
             )}
             {filtered.map((friend) => (

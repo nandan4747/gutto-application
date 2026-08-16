@@ -16,6 +16,8 @@ import { useNavigationView } from "../../../contexts/Navigationprovider";
 import FriendsPanel from "../freinds-pages/Friendspanel";
 import { useConversation } from "../../../contexts/ConversationContext";
 import ProfilePanel from "../freinds-pages/components/ProfilePanel";
+import GroupChatPanel from "../group-chat/GroupChatPanel";
+import GroupChatWindow from "../group-chat/components/GroupChatWindow";
 
 export default function Chat() {
   const navigate = useNavigate();
@@ -27,6 +29,7 @@ export default function Chat() {
     selectedConversationId,
     setSelectedConversationId,
     selectedUserProfile,
+    setSelectedUserProfile,
   } = useConversation();
 
   const [initialLoading, setInitialLoading] = useState(true);
@@ -36,6 +39,17 @@ export default function Chat() {
       navigate("/auth");
     }
   }, [user, authLoading, navigate]);
+
+  // Chats, Friends, and Group chat currently share the same
+  // selectedConversationId/selectedUserProfile state (ConversationContext
+  // isn't view-scoped). Without this, leaving a DM open and switching to
+  // "Group chat" would try to render that DM's id as a group. Clearing on
+  // every view switch keeps each tab starting from its own empty state.
+  useEffect(() => {
+    setSelectedConversationId(null);
+    setSelectedUserProfile(null);
+  }, [activeView, setSelectedConversationId, setSelectedUserProfile]);
+
 
   useEffect(() => {
     if (!user) return;
@@ -68,13 +82,13 @@ export default function Chat() {
   }
 
   // On mobile, this class flips the layout to show only the chat pane
-  // instead of both panes at once (see .conversationSelected in the CSS).
-  // Only relevant when we're actually looking at a DM/group conversation —
-  // the Friends panel doesn't have a "chat pane" counterpart to expand into.
+  // instead of both panes at once. Extended to cover "groups" too — a
+  // selected group behaves the same as a selected DM conversation here.
   const pageClassName = [
     styles.chatPage,
     (activeView === "chats" && selectedConversationId) ||
-    (activeView === "friends" && selectedUserProfile)
+      (activeView === "friends" && selectedUserProfile) ||
+      (activeView === "groups" && selectedConversationId)
       ? styles.conversationSelected
       : "",
   ]
@@ -92,6 +106,11 @@ export default function Chat() {
       <div className={styles.sidebarPane}>
         {activeView === "friends" ? (
           <FriendsPanel />
+        ) : activeView === "groups" ? (
+          <GroupChatPanel
+            selectedConversationId={selectedConversationId}
+            onSelect={setSelectedConversationId}
+          />
         ) : (
           <ConversationList
             selectedConversationId={selectedConversationId}
@@ -102,6 +121,12 @@ export default function Chat() {
       <div className={styles.chatPane}>
         {activeView === "friends" && selectedUserProfile ? (
           <ProfilePanel />
+        ) : activeView === "groups" ? (
+          <GroupChatWindow
+            conversationId={selectedConversationId}
+            onSendMessage={sendMessage}
+            onBack={() => setSelectedConversationId(null)}
+          />
         ) : (
           <ChatWindow
             conversationId={selectedConversationId}

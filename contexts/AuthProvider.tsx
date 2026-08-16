@@ -3,7 +3,7 @@ import { API_DETAILS } from "../src/api/API_DETAILS";
 
 const AuthContext = createContext({
   user: null,
-  setUser: (user: any) => {},
+  setUser: (user: any) => { },
   loading: true,
 });
 
@@ -21,7 +21,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const url = `${API_DETAILS.host}/user/me`;
-    console.log("Checking authentication status at:", url);
+    // console.log("Checking authentication status at:", url);
     setLoading(true);
     fetch(url, { credentials: "include" })
       .then((res) => {

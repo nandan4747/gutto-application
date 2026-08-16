@@ -12,14 +12,6 @@ export default function MessageBubble({ message }: Props) {
 
   const isOwn = String(message.senderId) === String(currentUserId);
 
-  console.log({
-    senderId: message.senderId,
-    senderIdType: typeof message.senderId,
-    currentUserId,
-    currentUserIdType: typeof currentUserId,
-    isOwn,
-  });
-
   return (
     <div
       style={{

@@ -1,6 +1,8 @@
 import type { ConversationEntry } from "../../../../contexts/MessageProvider";
 import { colorScheme } from "../../../theme/colorScheme";
 import { Avatar } from "../../../components/avatart_genrator/Avatar";
+import { useConnectedPeople } from "../../../../contexts/RelationProvider";
+import { useConversation } from "../../../../contexts/ConversationContext";
 
 interface Props {
   conversationId: string;
@@ -14,14 +16,19 @@ export default function ConversationItem({
   isSelected,
   onClick,
 }: Props) {
+
+  const { selectedConversationId } = useConversation();
+  const { getConnection } = useConnectedPeople();
+
   const displayName =
     entry.type === "dm"
       ? (entry.participant?.fullname ??
         entry.participant?.username ??
-        "Unknown")
+        getConnection(selectedConversationId)?.fullname ?? "Unknown")
       : (entry.groupInfo?.name ?? "Group");
 
   const lastMessage = entry.messageList[entry.messageList.length - 1];
+
 
   return (
     <div

@@ -23,8 +23,13 @@ export default function ProfilePanel() {
   const isBlocked = blockedUsers.some((u) => u._id === selectedUserProfile._id);
 
   const handleMessage = () => {
-    setSelectedConversationId(selectedUserProfile._id);
+    // 1. Trigger the view change (which triggers the cleanup useEffect in Chat.tsx)
     setActiveView("chats");
+
+    // 2. Wait for the dust to settle, THEN set the ID
+    setTimeout(() => {
+      setSelectedConversationId(selectedUserProfile._id);
+    }, 0);
   };
 
   const handleUnfriend = async () => {

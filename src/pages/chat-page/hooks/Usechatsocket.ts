@@ -17,10 +17,13 @@ export function useChatSocket() {
   } = useMessages();
 
   useEffect(() => {
-    if (!socket) return;
+    if (!socket || !user) return;
+    const currentUserId = (user as any).id ?? (user as any)._id;
 
     const handleNewMessage = (payload: any) => {
       // payload: { _id, text, from, type, url, createdAt }
+
+      if (String(payload.from) === String(currentUserId)) return;
       addIncomingMessage(
         payload.from,
         {
@@ -38,6 +41,7 @@ export function useChatSocket() {
     const handleNewGroupMessage = (payload: any) => {
       // ASSUMPTION: payload includes groupId + from, matching the same
       // shape as newMessage plus groupId. Adjust if backend differs.
+      if (String(payload.from) === String(currentUserId)) return;
       addIncomingMessage(
         payload.groupId,
         {

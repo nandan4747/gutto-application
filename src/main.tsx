@@ -7,14 +7,18 @@ import { SocketProvider } from "../contexts/SocketProvider.tsx";
 import { MessageProvider } from "../contexts/MessageProvider.tsx";
 import { NavigationProvider } from "../contexts/Navigationprovider.tsx";
 
+import { ConnectedPeopleProvider } from "../contexts/RelationProvider.tsx";
+
 createRoot(document.getElementById("root")!).render(
   <AuthProvider>
     <SocketProvider>
       <MessageProvider>
         <NavigationProvider>
-          <BrowserRouter>
-            <App />
-          </BrowserRouter>
+          <ConnectedPeopleProvider>
+            <BrowserRouter>
+              <App />
+            </BrowserRouter>
+          </ConnectedPeopleProvider>
         </NavigationProvider>
       </MessageProvider>
     </SocketProvider>
