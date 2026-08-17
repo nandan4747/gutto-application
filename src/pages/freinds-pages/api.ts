@@ -13,13 +13,24 @@ async function handle(res: Response) {
 }
 
 // GET /api/user/connections
-export const getConnections = async () => {
-  const res = await fetch(`${BASE}/connections`, {
+export const getConnections = async (cursor?: string, limit = 10) => {
+  const params = new URLSearchParams();
+  if (cursor) params.set("cursor", cursor);
+  params.set("limit", String(limit));
+
+  const res = await fetch(`${BASE}/connections?${params.toString()}`, {
     credentials: "include",
   });
-  return handle(res);
+  return handle(res); // -> { data: Connection[], nextCursor: string | null }
 };
 
+export const searchConnections = async (username: string) => {
+  const params = new URLSearchParams({ username });
+  const res = await fetch(`${BASE}/connections/search?${params.toString()}`, {
+    credentials: "include",
+  });
+  return handle(res); // -> { data: Connection[] }
+};
 // GET /api/user/search?q=
 export const searchUsers = async (query: string) => {
   const res = await fetch(`${BASE}/search?q=${encodeURIComponent(query)}`, {
@@ -67,28 +78,37 @@ export const rejectFriendRequest = async (requestId: string) => {
 
 // POST /api/user/unfriend?targetId=
 export const unfriendUser = async (targetId: string) => {
-  const res = await fetch(`${BASE}/unfriend?targetId=${encodeURIComponent(targetId)}`, {
-    method: "POST",
-    credentials: "include",
-  });
+  const res = await fetch(
+    `${BASE}/unfriend?targetId=${encodeURIComponent(targetId)}`,
+    {
+      method: "POST",
+      credentials: "include",
+    },
+  );
   return handle(res);
 };
 
 // POST /api/user/block?targetId=
 export const blockUser = async (targetId: string) => {
-  const res = await fetch(`${BASE}/block?targetId=${encodeURIComponent(targetId)}`, {
-    method: "POST",
-    credentials: "include",
-  });
+  const res = await fetch(
+    `${BASE}/block?targetId=${encodeURIComponent(targetId)}`,
+    {
+      method: "POST",
+      credentials: "include",
+    },
+  );
   return handle(res);
 };
 
 // POST /api/user/unblock?targetId=
 export const unblockUser = async (targetId: string) => {
-  const res = await fetch(`${BASE}/unblock?targetId=${encodeURIComponent(targetId)}`, {
-    method: "POST",
-    credentials: "include",
-  });
+  const res = await fetch(
+    `${BASE}/unblock?targetId=${encodeURIComponent(targetId)}`,
+    {
+      method: "POST",
+      credentials: "include",
+    },
+  );
   return handle(res);
 };
 

@@ -6,6 +6,7 @@ import MessageBubble from "./MessageBubble";
 import MessageInput from "./MessageInput";
 import styles from "../Chat.module.css";
 import { useConnectedPeople } from "../../../../contexts/RelationProvider";
+import { usePseudoConnection } from "../../../../contexts/PseudoConnectionContext";
 
 import { Avatar } from "../../../components/avatart_genrator/Avatar";
 import { colorScheme } from "../../../theme/colorScheme";
@@ -39,17 +40,12 @@ export default function ChatWindow({
     prependHistory,
   } = useMessages();
 
-  // Tracks which conversations we've already fetched the FIRST page for,
-  // so re-selecting the same chat doesn't refetch it.
   const loadedInitialRef = useRef(new Set<string>());
-
-  // Per-conversation pagination bookkeeping (cursor / hasMore / in-flight
-  // guard). Lives in a ref, not state — updating it shouldn't trigger a
-  // re-render on its own, only the actual message list changing should.
   const paginationRef = useRef<Record<string, PaginationState>>({});
-
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
   const { getConnection } = useConnectedPeople();
+  const { getCachedUser, fetchUser } = usePseudoConnection();
 
   useEffect(() => {
     setActiveConversation(conversationId);
@@ -70,8 +66,6 @@ export default function ChatWindow({
       getChatHistory(conversationId)
         .then((raw) => {
           const { messages, nextCursor } = normalizeChatHistoryPage(raw);
-          // NOTE: loadHistory takes the message array itself, not the
-          // {messages, nextCursor} wrapper — pass .messages here.
           loadHistory(conversationId, messages);
           paginationRef.current[conversationId] = {
             nextCursor,
@@ -81,7 +75,7 @@ export default function ChatWindow({
         })
         .catch((err) => {
           console.error("Failed to load chat history:", err);
-          loadedInitialRef.current.delete(conversationId); // allow retry
+          loadedInitialRef.current.delete(conversationId);
         });
     }
 
@@ -93,8 +87,6 @@ export default function ChatWindow({
     if (!conversationId) return;
 
     const pageState = paginationRef.current[conversationId];
-    // No pagination state yet means the first page hasn't resolved.
-    // Also bail if there's nothing more, or a fetch is already in flight.
     if (!pageState || !pageState.hasMore || pageState.isLoading) return;
 
     pageState.isLoading = true;
@@ -115,10 +107,6 @@ export default function ChatWindow({
         isLoading: false,
       };
 
-      // Older messages just got inserted ABOVE the current scroll
-      // position. Without this, the browser keeps scrollTop fixed and
-      // the view visually jumps down by the height of what was added —
-      // this restores the same messages the user was already looking at.
       requestAnimationFrame(() => {
         if (el) {
           const newScrollHeight = el.scrollHeight;
@@ -134,12 +122,32 @@ export default function ChatWindow({
   const handleScroll = () => {
     const el = scrollContainerRef.current;
     if (!el) return;
-    // Trigger a bit before hitting the literal top so it feels
-    // pre-emptive rather than snapping in after the user's already there.
     if (el.scrollTop < 150) {
       loadOlderMessages();
     }
   };
+
+  // Same fallback chain as ConversationItem: cached participant info ->
+  // shared "known people" cache -> one-off profile-lookup cache -> fetch
+  // if all three come up empty.
+  const entry = conversationId ? state[conversationId] : undefined;
+
+  const knownConnection = conversationId
+    ? (getConnection(conversationId) ?? getCachedUser(conversationId))
+    : undefined;
+  const knownName =
+    entry?.type === "dm"
+      ? (entry.participant?.fullname ??
+        entry.participant?.username ??
+        knownConnection?.fullname ??
+        knownConnection?.username)
+      : entry?.groupInfo?.name;
+
+  useEffect(() => {
+    if (!conversationId || entry?.type !== "dm" || knownName) return;
+    console.log("making call");
+    fetchUser(conversationId);
+  }, [conversationId, entry?.type, knownName, fetchUser]);
 
   if (!conversationId) {
     return (
@@ -149,18 +157,8 @@ export default function ChatWindow({
     );
   }
 
-  const entry = state[conversationId];
-  let displayName =
-    entry?.type === "dm"
-      ? (entry.participant?.fullname ?? entry.participant?.username)
-      : entry?.groupInfo?.name;
-
-  console.log(`display name : ${displayName}`);
-  if (!displayName) {
-    console.log("getting details by connection context");
-    const connection = getConnection(conversationId);
-    displayName = connection?.fullname ?? connection?.username;
-  }
+  const isResolving = entry?.type === "dm" && !knownName;
+  const displayName = knownName ?? (isResolving ? "..." : "Unknown");
 
   return (
     <>
@@ -194,7 +192,7 @@ export default function ChatWindow({
             <path d="m15 18-6-6 6-6" />
           </svg>
         </button>
-        <Avatar name={displayName || "Unknown"} size={50} />
+        <Avatar name={isResolving ? "?" : displayName} size={50} />
         {displayName}
       </div>
 

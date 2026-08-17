@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../contexts/AuthProvider";
 import { useEffect, useState } from "react";
 import { useMessages } from "../../../contexts/MessageProvider";
-import { getConversations, getUnreadedMessages } from "./api";
+import { getConversations } from "./api";
 import {
   normalizeConversations,
   normalizeUnreadCounts,
@@ -50,7 +50,6 @@ export default function Chat() {
     setSelectedUserProfile(null);
   }, [activeView, setSelectedConversationId, setSelectedUserProfile]);
 
-
   useEffect(() => {
     if (!user) return;
 
@@ -61,10 +60,6 @@ export default function Chat() {
         const rawConversations = await getConversations();
         if (cancelled) return;
         hydrateConversations(normalizeConversations(rawConversations));
-
-        const rawUnread = await getUnreadedMessages();
-        if (cancelled) return;
-        applyUnreadCounts(normalizeUnreadCounts(rawUnread));
       } catch (err) {
         console.error("Failed to load chat data:", err);
       } finally {
@@ -87,8 +82,8 @@ export default function Chat() {
   const pageClassName = [
     styles.chatPage,
     (activeView === "chats" && selectedConversationId) ||
-      (activeView === "friends" && selectedUserProfile) ||
-      (activeView === "groups" && selectedConversationId)
+    (activeView === "friends" && selectedUserProfile) ||
+    (activeView === "groups" && selectedConversationId)
       ? styles.conversationSelected
       : "",
   ]

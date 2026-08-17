@@ -1,7 +1,7 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { Search, UserPlus } from "lucide-react";
 import { colorScheme } from "../../theme/colorScheme";
-import { getConnections, getPendingRequests } from "./api";
+import { getConnections, getPendingRequests, searchConnections } from "./api";
 import FriendCard from "./components/Friendcard";
 import AddFriendPanel from "./components/Addfriendpanel";
 import PendingRequestsPanel from "./components/PendingRequestsPanel";
@@ -18,42 +18,96 @@ interface PendingRequest {
 
 type Tab = "friends" | "requests" | "blocked";
 
+const PAGE_LIMIT = 10;
+const SEARCH_DEBOUNCE_MS = 500;
+const SCROLL_THRESHOLD_PX = 80;
+
 export default function FriendsPanel() {
   const { blockedUsers, setBlockedUsers } = useConversation();
-  const { connections, setConnections } = useConnectedPeople();
+  const { connections, setConnections, mergeConnections } =
+    useConnectedPeople();
+
   const [pendingRequests, setPendingRequests] = useState<PendingRequest[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [isAdding, setIsAdding] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>("friends");
 
-  const loadAll = useCallback(async () => {
+  // pagination
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [hasNextPage, setHasNextPage] = useState(false);
+
+  // remote fallback search
+  const [remoteSearching, setRemoteSearching] = useState(false);
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const listRef = useRef<HTMLDivElement | null>(null);
+
+  const loadPendingRequests = useCallback(async () => {
+    try {
+      const requestsData = await getPendingRequests();
+      setPendingRequests(requestsData.requests ?? []);
+    } catch (err: any) {
+      setError(err.message);
+    }
+  }, []);
+
+  // First page — gated on the context actually being empty.
+  const loadInitial = useCallback(async () => {
     setLoading(true);
     try {
-      const [connectionsData, requestsData] = await Promise.all([
-        getConnections(),
-        getPendingRequests(),
+      const [connectionsRes] = await Promise.all([
+        getConnections(undefined, PAGE_LIMIT),
+        loadPendingRequests(),
       ]);
-      // CHANGED: Map keyed by _id instead of a Set — see RelationProvider
-      // for why (correct dedup + O(1) lookup for group chat name resolution).
-      setConnections(new Map(connectionsData.map((c: any) => [c._id, c])));
-      setPendingRequests(requestsData.requests ?? []);
+      setConnections(new Map(connectionsRes.data.map((c: any) => [c._id, c])));
+      setCursor(connectionsRes.nextCursor);
+      setHasNextPage(Boolean(connectionsRes.nextCursor));
       setError(null);
     } catch (err: any) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [loadPendingRequests, setConnections]);
 
   useEffect(() => {
-    loadAll();
-  }, [loadAll]);
+    if (connections.size === 0) {
+      loadInitial();
+    } else {
+      // context already warm from a previous mount — skip /connections entirely
+      setLoading(false);
+      loadPendingRequests();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  // CHANGED: Array.from(connections.values()) instead of Array.from(connections)
-  // — Map iterates as [key, value] pairs by default, .values() gives us
-  // just the Connection objects, same as before.
+  const loadMore = useCallback(async () => {
+    if (!hasNextPage || loadingMore || !cursor) return;
+    setLoadingMore(true);
+    try {
+      const res = await getConnections(cursor, PAGE_LIMIT);
+      mergeConnections(res.data);
+      setCursor(res.nextCursor);
+      setHasNextPage(Boolean(res.nextCursor));
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [cursor, hasNextPage, loadingMore, mergeConnections]);
+
+  const handleScroll = useCallback(() => {
+    const el = listRef.current;
+    if (!el) return;
+    const { scrollTop, scrollHeight, clientHeight } = el;
+    if (scrollHeight - scrollTop - clientHeight < SCROLL_THRESHOLD_PX) {
+      loadMore();
+    }
+  }, [loadMore]);
+
   const filtered = Array.from(connections.values()).filter((c) => {
     const term = searchTerm.trim().toLowerCase();
     if (!term) return true;
@@ -63,13 +117,40 @@ export default function FriendsPanel() {
     );
   });
 
+  // Local list has nothing for this term -> ask the server, scoped to
+  // this user's own connections, then merge whatever comes back.
+  useEffect(() => {
+    const term = searchTerm.trim();
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+
+    if (!term || filtered.length > 0) {
+      setRemoteSearching(false);
+      return;
+    }
+
+    searchDebounceRef.current = setTimeout(async () => {
+      setRemoteSearching(true);
+      try {
+        const res = await searchConnections(term);
+        if (res.data?.length) mergeConnections(res.data);
+      } catch (err) {
+        console.error("Friend search failed:", err);
+      } finally {
+        setRemoteSearching(false);
+      }
+    }, SEARCH_DEBOUNCE_MS);
+
+    return () => {
+      if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchTerm]);
+
   const handleRequestResolved = (requestId: string, accepted: boolean) => {
     setPendingRequests((prev) => prev.filter((r) => r._id !== requestId));
     if (accepted) {
-      getConnections()
-        .then((data: any[]) =>
-          setConnections(new Map(data.map((c) => [c._id, c]))),
-        )
+      getConnections(undefined, PAGE_LIMIT)
+        .then((res: any) => mergeConnections(res.data))
         .catch((err) => console.error("Failed to refresh connections:", err));
     }
   };
@@ -165,17 +246,22 @@ export default function FriendsPanel() {
             />
           </div>
 
-          <div className={styles.list}>
+          <div className={styles.list} ref={listRef} onScroll={handleScroll}>
             {loading && <p className={styles.emptyText}>Loading friends...</p>}
             {error && <p className={styles.errorText}>{error}</p>}
             {!loading && !error && filtered.length === 0 && (
               <p className={styles.emptyText}>
-                {connections.size === 0 ? "No friends yet" : "No matches"}
+                {remoteSearching
+                  ? "Searching..."
+                  : connections.size === 0
+                    ? "No friends yet"
+                    : "No matches"}
               </p>
             )}
             {filtered.map((friend) => (
               <FriendCard key={friend._id} friend={friend} />
             ))}
+            {loadingMore && <p className={styles.emptyText}>Loading more...</p>}
           </div>
         </>
       )}

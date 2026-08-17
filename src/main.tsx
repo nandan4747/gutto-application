@@ -6,7 +6,7 @@ import { AuthProvider } from "../contexts/AuthProvider.tsx";
 import { SocketProvider } from "../contexts/SocketProvider.tsx";
 import { MessageProvider } from "../contexts/MessageProvider.tsx";
 import { NavigationProvider } from "../contexts/Navigationprovider.tsx";
-
+import { PseudoConnectionProvider } from "../contexts/PseudoConnectionContext.tsx";
 import { ConnectedPeopleProvider } from "../contexts/RelationProvider.tsx";
 
 createRoot(document.getElementById("root")!).render(
@@ -15,9 +15,11 @@ createRoot(document.getElementById("root")!).render(
       <MessageProvider>
         <NavigationProvider>
           <ConnectedPeopleProvider>
-            <BrowserRouter>
-              <App />
-            </BrowserRouter>
+            <PseudoConnectionProvider>
+              <BrowserRouter>
+                <App />
+              </BrowserRouter>
+            </PseudoConnectionProvider>
           </ConnectedPeopleProvider>
         </NavigationProvider>
       </MessageProvider>

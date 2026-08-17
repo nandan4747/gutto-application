@@ -1,8 +1,9 @@
+import { useEffect } from "react";
 import type { ConversationEntry } from "../../../../contexts/MessageProvider";
 import { colorScheme } from "../../../theme/colorScheme";
 import { Avatar } from "../../../components/avatart_genrator/Avatar";
 import { useConnectedPeople } from "../../../../contexts/RelationProvider";
-import { useConversation } from "../../../../contexts/ConversationContext";
+import { usePseudoConnection } from "../../../../contexts/PseudoConnectionContext";
 
 interface Props {
   conversationId: string;
@@ -12,23 +13,43 @@ interface Props {
 }
 
 export default function ConversationItem({
+  conversationId,
   entry,
   isSelected,
   onClick,
 }: Props) {
-
-  const { selectedConversationId } = useConversation();
   const { getConnection } = useConnectedPeople();
+  const { getCachedUser, fetchUser } = usePseudoConnection();
 
-  const displayName =
+  // Fallback chain for DMs: the conversation's own cached participant
+  // info -> the shared "known people" cache (friends/group members) ->
+  // the one-off profile-lookup cache. Uses THIS card's conversationId,
+  // not the globally selected one (that was the bug — selectedConversationId
+  // has no relation to which row is rendering).
+  const knownConnection =
+    entry.type === "dm"
+      ? (getConnection(conversationId) ?? getCachedUser(conversationId))
+      : undefined;
+
+  const knownName =
     entry.type === "dm"
       ? (entry.participant?.fullname ??
         entry.participant?.username ??
-        getConnection(selectedConversationId)?.fullname ?? "Unknown")
-      : (entry.groupInfo?.name ?? "Group");
+        knownConnection?.fullname ??
+        knownConnection?.username)
+      : entry.groupInfo?.name;
 
+  // If it's a DM and we still don't know who this is from anything
+  // already cached, go fetch it once. Guarded on knownName so this
+  // doesn't refire every render — only when genuinely unresolved.
+  useEffect(() => {
+    if (entry.type !== "dm" || knownName) return;
+    fetchUser(conversationId);
+  }, [entry.type, knownName, conversationId, fetchUser]);
+
+  const isResolving = entry.type === "dm" && !knownName;
+  const displayName = knownName ?? (isResolving ? "..." : "Group");
   const lastMessage = entry.messageList[entry.messageList.length - 1];
-
 
   return (
     <div
@@ -43,7 +64,6 @@ export default function ConversationItem({
         alignItems: "center",
       }}
     >
-      {/* Grouped Avatar and Text with a gap */}
       <div
         style={{
           display: "flex",
@@ -52,9 +72,8 @@ export default function ConversationItem({
           overflow: "hidden",
         }}
       >
-        <Avatar name={displayName || "Unknown"} size={48} />
+        <Avatar name={isResolving ? "?" : displayName} size={48} />
 
-        {/* Added overflow handling so long names don't wreck your UI */}
         <div style={{ overflow: "hidden" }}>
           <div
             style={{
@@ -88,7 +107,7 @@ export default function ConversationItem({
             borderRadius: 12,
             padding: "2px 8px",
             fontSize: 12,
-            marginLeft: "8px", // Gives some breathing room if the name pushes right up against it
+            marginLeft: "8px",
             flexShrink: 0,
           }}
         >

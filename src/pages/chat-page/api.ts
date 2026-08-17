@@ -23,12 +23,13 @@ export const getConversations = async () => {
 
 // GET /api/chat/unreaded
 // ASSUMPTION: returns an array like [{ senderId, count }, ...]
+/*
 export const getUnreadedMessages = async () => {
   const res = await fetch(`${BASE}/unreaded`, {
     credentials: "include",
   });
   return handle(res);
-};
+};*/
 
 // GET /api/chat/markasread?senderId=
 export const markAsRead = async (senderId: string) => {
