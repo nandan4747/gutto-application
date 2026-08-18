@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useCallback, useRef } from "react";
 import { useMessages } from "../../../../contexts/MessageProvider";
 import { getChatHistory, markAsRead } from "../api";
 import { normalizeChatHistoryPage } from "../utils/normalize";
@@ -21,12 +21,6 @@ interface Props {
   onBack: () => void;
 }
 
-interface PaginationState {
-  nextCursor: string | null;
-  hasMore: boolean;
-  isLoading: boolean;
-}
-
 export default function ChatWindow({
   conversationId,
   onSendMessage,
@@ -38,10 +32,15 @@ export default function ChatWindow({
     markConversationRead,
     loadHistory,
     prependHistory,
+    hasLoadedInitial,
+    markLoadedInitial,
+    unmarkLoadedInitial,
+    getPaginationState,
+    setPaginationState,
   } = useMessages();
 
-  const loadedInitialRef = useRef(new Set<string>());
-  const paginationRef = useRef<Record<string, PaginationState>>({});
+  // Only the scroll container stays local — it's a DOM handle for whichever
+  // instance is currently mounted, there's nothing to preserve across remounts.
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const { getConnection } = useConnectedPeople();
@@ -61,21 +60,21 @@ export default function ChatWindow({
       markConversationRead(conversationId);
     }
 
-    if (!loadedInitialRef.current.has(conversationId)) {
-      loadedInitialRef.current.add(conversationId);
+    if (!hasLoadedInitial(conversationId)) {
+      markLoadedInitial(conversationId);
       getChatHistory(conversationId)
         .then((raw) => {
           const { messages, nextCursor } = normalizeChatHistoryPage(raw);
           loadHistory(conversationId, messages);
-          paginationRef.current[conversationId] = {
+          setPaginationState(conversationId, {
             nextCursor,
             hasMore: nextCursor !== null,
             isLoading: false,
-          };
+          });
         })
         .catch((err) => {
           console.error("Failed to load chat history:", err);
-          loadedInitialRef.current.delete(conversationId);
+          unmarkLoadedInitial(conversationId);
         });
     }
 
@@ -86,10 +85,10 @@ export default function ChatWindow({
   const loadOlderMessages = useCallback(async () => {
     if (!conversationId) return;
 
-    const pageState = paginationRef.current[conversationId];
+    const pageState = getPaginationState(conversationId);
     if (!pageState || !pageState.hasMore || pageState.isLoading) return;
 
-    pageState.isLoading = true;
+    setPaginationState(conversationId, { ...pageState, isLoading: true });
 
     const el = scrollContainerRef.current;
     const prevScrollHeight = el?.scrollHeight ?? 0;
@@ -101,11 +100,11 @@ export default function ChatWindow({
       const { messages, nextCursor } = normalizeChatHistoryPage(raw);
 
       prependHistory(conversationId, messages);
-      paginationRef.current[conversationId] = {
+      setPaginationState(conversationId, {
         nextCursor,
         hasMore: nextCursor !== null,
         isLoading: false,
-      };
+      });
 
       requestAnimationFrame(() => {
         if (el) {
@@ -115,9 +114,9 @@ export default function ChatWindow({
       });
     } catch (err) {
       console.error("Failed to load older messages:", err);
-      pageState.isLoading = false;
+      setPaginationState(conversationId, { ...pageState, isLoading: false });
     }
-  }, [conversationId, prependHistory]);
+  }, [conversationId, prependHistory, getPaginationState, setPaginationState]);
 
   const handleScroll = () => {
     const el = scrollContainerRef.current;
@@ -127,9 +126,6 @@ export default function ChatWindow({
     }
   };
 
-  // Same fallback chain as ConversationItem: cached participant info ->
-  // shared "known people" cache -> one-off profile-lookup cache -> fetch
-  // if all three come up empty.
   const entry = conversationId ? state[conversationId] : undefined;
 
   const knownConnection = conversationId
@@ -145,7 +141,6 @@ export default function ChatWindow({
 
   useEffect(() => {
     if (!conversationId || entry?.type !== "dm" || knownName) return;
-    console.log("making call");
     fetchUser(conversationId);
   }, [conversationId, entry?.type, knownName, fetchUser]);
 

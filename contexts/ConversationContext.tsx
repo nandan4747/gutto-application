@@ -10,15 +10,19 @@ export interface UserInfo {
 
 interface ConversationContextValue {
   selectedConversationId: string | null;
-  setSelectedConversationId: React.Dispatch<React.SetStateAction<string | null>>;
+  setSelectedConversationId: React.Dispatch<
+    React.SetStateAction<string | null>
+  >;
   selectedUserProfile: UserInfo | null;
   setSelectedUserProfile: React.Dispatch<React.SetStateAction<UserInfo | null>>;
   blockedUsers: UserInfo[];
   setBlockedUsers: React.Dispatch<React.SetStateAction<UserInfo[]>>;
+  showGroupInfo: boolean;
+  setShowGroupInfo: (show: boolean) => void;
 }
 
 const ConversationContext = createContext<ConversationContextValue | undefined>(
-  undefined
+  undefined,
 );
 
 export function ConversationProvider({
@@ -32,6 +36,8 @@ export function ConversationProvider({
   const [selectedUserProfile, setSelectedUserProfile] =
     useState<UserInfo | null>(null);
   const [blockedUsers, setBlockedUsers] = useState<UserInfo[]>([]);
+
+  const [showGroupInfo, setShowGroupInfo] = useState(false);
 
   // Fetch blocked users from the API on mount so the list survives refreshes
   useEffect(() => {
@@ -52,6 +58,8 @@ export function ConversationProvider({
         setSelectedUserProfile,
         blockedUsers,
         setBlockedUsers,
+        showGroupInfo,
+        setShowGroupInfo,
       }}
     >
       {children}
@@ -63,7 +71,7 @@ export function useConversation() {
   const context = useContext(ConversationContext);
   if (!context) {
     throw new Error(
-      "useConversation must be used within a ConversationProvider"
+      "useConversation must be used within a ConversationProvider",
     );
   }
   return context;

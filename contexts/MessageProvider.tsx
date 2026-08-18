@@ -13,7 +13,7 @@ export type MessageStatus = "sending" | "sent" | "failed";
 export type MessageType = "text" | "image" | "file";
 
 export interface StoredMessage {
-  messageId: string; // real _id once confirmed, tempId while pending
+  messageId: string;
   tempId?: string;
   text: string;
   type: MessageType;
@@ -26,10 +26,21 @@ export interface StoredMessage {
 export interface ConversationEntry {
   type: "dm" | "group";
   participant?: { id: string; username: string; fullname: string };
-  groupInfo?: { id: string; name: string; members: string[] };
+  groupInfo?: { id: string; name: string; members: string[]; admin: string };
   messageList: StoredMessage[];
   lastUpdated: string;
   unreadedCount: number;
+}
+
+// Moved here from ChatWindow/GroupChatWindow — component-local useRef state
+// reset to empty on unmount/remount (e.g. switching away from a chat and
+// back), which re-triggered the initial-history fetch every time. Living on
+// the provider means it survives that. Refs, not state, so mutating them
+// never re-renders anything reading `state`.
+export interface PaginationState {
+  nextCursor: string | null;
+  hasMore: boolean;
+  isLoading: boolean;
 }
 
 interface MessageState {
@@ -82,6 +93,18 @@ type Action =
   | {
       type: "PREPEND_HISTORY";
       payload: { conversationId: string; messages: StoredMessage[] };
+    }
+  | {
+      type: "UPDATE_GROUP_INFO";
+      payload: {
+        conversationId: string;
+        members?: string[];
+        name?: string;
+      };
+    }
+  | {
+      type: "REMOVE_CONVERSATION";
+      payload: { conversationId: string };
     };
 
 // ---------- Reducer ----------
@@ -104,7 +127,6 @@ function ensureConversation(
 function messageReducer(state: MessageState, action: Action): MessageState {
   switch (action.type) {
     case "HYDRATE_CONVERSATIONS": {
-      // merge rather than overwrite, in case sockets beat the fetch
       return { ...action.payload, ...state };
     }
 
@@ -211,11 +233,6 @@ function messageReducer(state: MessageState, action: Action): MessageState {
       const existing = state[conversationId];
       if (!existing) return state;
 
-      // The cache may already hold a single "preview" message (from
-      // /conversations) or local-only pending/failed sends. History is
-      // the source of truth for anything with status "sent", so we
-      // replace those, but keep anything still in-flight or failed that
-      // hasn't landed in the DB yet (and therefore isn't in history).
       const historyIds = new Set(messages.map((m) => m.messageId));
       const pendingLocal = existing.messageList.filter(
         (m) => m.status !== "sent" && !historyIds.has(m.messageId),
@@ -231,8 +248,6 @@ function messageReducer(state: MessageState, action: Action): MessageState {
     }
 
     case "PREPEND_HISTORY": {
-      // Used for "scroll up to load older messages" — adds an older page
-      // to the FRONT of the list without touching what's already loaded.
       const { conversationId, messages } = action.payload;
       const existing = state[conversationId];
       if (!existing) return state;
@@ -247,6 +262,32 @@ function messageReducer(state: MessageState, action: Action): MessageState {
           messageList: [...newOnes, ...existing.messageList],
         },
       };
+    }
+
+    case "UPDATE_GROUP_INFO": {
+      const { conversationId, members, name } = action.payload;
+      const existing = state[conversationId];
+      if (!existing || !existing.groupInfo) return state;
+
+      return {
+        ...state,
+        [conversationId]: {
+          ...existing,
+          groupInfo: {
+            ...existing.groupInfo,
+            ...(members ? { members } : {}),
+            ...(name ? { name } : {}),
+          },
+        },
+      };
+    }
+
+    case "REMOVE_CONVERSATION": {
+      const { conversationId } = action.payload;
+      if (!state[conversationId]) return state;
+      const next = { ...state };
+      delete next[conversationId];
+      return next;
     }
 
     default:
@@ -284,17 +325,33 @@ interface MessageContextValue {
   loadHistory: (conversationId: string, messages: StoredMessage[]) => void;
   prependHistory: (conversationId: string, messages: StoredMessage[]) => void;
   setActiveConversation: (conversationId: string | null) => void;
+  updateGroupInfo: (
+    conversationId: string,
+    patch: { members?: string[]; name?: string },
+  ) => void;
+  removeConversation: (conversationId: string) => void;
+
+  // ---- pagination / initial-load guard ----
+  hasLoadedInitial: (conversationId: string) => boolean;
+  markLoadedInitial: (conversationId: string) => void;
+  unmarkLoadedInitial: (conversationId: string) => void; // retry after failed fetch
+  getPaginationState: (conversationId: string) => PaginationState | undefined;
+  setPaginationState: (conversationId: string, state: PaginationState) => void;
 }
 
 const MessageContext = createContext<MessageContextValue | null>(null);
 
 export function MessageProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(messageReducer, {});
-
-  // Mutable, always-current pointer to "which chat is open right now".
-  // A ref (not state) so socket listeners attached once can still read
-  // the latest value without needing to re-subscribe on every navigation.
   const activeConversationRef = useRef<string | null>(null);
+
+  // See PaginationState comment above — these survive ChatWindow /
+  // GroupChatWindow unmount+remount because they live here, not in the
+  // component. REMOVE_CONVERSATION (group deleted) should also clear
+  // these so a recreated group with the same-shaped state doesn't get
+  // stale pagination — handled in removeConversation below.
+  const loadedInitialRef = useRef(new Set<string>());
+  const paginationRef = useRef<Record<string, PaginationState>>({});
 
   const setActiveConversation = useCallback((conversationId: string | null) => {
     activeConversationRef.current = conversationId;
@@ -386,6 +443,51 @@ export function MessageProvider({ children }: { children: ReactNode }) {
     [],
   );
 
+  const updateGroupInfo = useCallback(
+    (conversationId: string, patch: { members?: string[]; name?: string }) => {
+      dispatch({
+        type: "UPDATE_GROUP_INFO",
+        payload: { conversationId, ...patch },
+      });
+    },
+    [],
+  );
+
+  const removeConversation = useCallback((conversationId: string) => {
+    dispatch({ type: "REMOVE_CONVERSATION", payload: { conversationId } });
+    // Clean up the guard/pagination stores too — otherwise a stale
+    // "already loaded" / cursor entry sits around forever for an id
+    // that no longer has a conversation, a small but real memory leak
+    // over a long session with lots of group churn.
+    loadedInitialRef.current.delete(conversationId);
+    delete paginationRef.current[conversationId];
+  }, []);
+
+  const hasLoadedInitial = useCallback(
+    (conversationId: string) => loadedInitialRef.current.has(conversationId),
+    [],
+  );
+
+  const markLoadedInitial = useCallback((conversationId: string) => {
+    loadedInitialRef.current.add(conversationId);
+  }, []);
+
+  const unmarkLoadedInitial = useCallback((conversationId: string) => {
+    loadedInitialRef.current.delete(conversationId);
+  }, []);
+
+  const getPaginationState = useCallback(
+    (conversationId: string) => paginationRef.current[conversationId],
+    [],
+  );
+
+  const setPaginationState = useCallback(
+    (conversationId: string, pageState: PaginationState) => {
+      paginationRef.current[conversationId] = pageState;
+    },
+    [],
+  );
+
   return (
     <MessageContext.Provider
       value={{
@@ -401,6 +503,13 @@ export function MessageProvider({ children }: { children: ReactNode }) {
         loadHistory,
         prependHistory,
         setActiveConversation,
+        updateGroupInfo,
+        removeConversation,
+        hasLoadedInitial,
+        markLoadedInitial,
+        unmarkLoadedInitial,
+        getPaginationState,
+        setPaginationState,
       }}
     >
       {children}

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useCallback } from "react";
 import { useMessages } from "../../../../contexts/MessageProvider";
-import { useConnectedPeople } from "../../../../contexts/RelationProvider";
+import { usePseudoConnection } from "../../../../contexts/PseudoConnectionContext";
+import { useConversation } from "../../../../contexts/ConversationContext";
 import { getGroupMessages } from "../Api";
 import { normalizeGroupMessagesPage } from "../utils/normalize";
 import GroupChatBubble from "./GroupChatBubble";
@@ -19,23 +20,25 @@ interface Props {
   onBack: () => void;
 }
 
-interface PaginationState {
-  nextCursor: string | null;
-  hasMore: boolean;
-  isLoading: boolean;
-}
-
 export default function GroupChatWindow({
   conversationId,
   onSendMessage,
   onBack,
 }: Props) {
-  const { state, setActiveConversation, loadHistory, prependHistory } =
-    useMessages();
-  const { mergeConnections } = useConnectedPeople();
+  const {
+    state,
+    setActiveConversation,
+    loadHistory,
+    prependHistory,
+    hasLoadedInitial,
+    markLoadedInitial,
+    unmarkLoadedInitial,
+    getPaginationState,
+    setPaginationState,
+  } = useMessages();
+  const { mergeUsers } = usePseudoConnection(); // message senders arent necessarily friends
+  const { setShowGroupInfo } = useConversation();
 
-  const loadedInitialRef = useRef(new Set<string>());
-  const paginationRef = useRef<Record<string, PaginationState>>({});
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -43,23 +46,23 @@ export default function GroupChatWindow({
 
     if (!conversationId) return;
 
-    if (!loadedInitialRef.current.has(conversationId)) {
-      loadedInitialRef.current.add(conversationId);
+    if (!hasLoadedInitial(conversationId)) {
+      markLoadedInitial(conversationId);
       getGroupMessages(conversationId)
         .then((raw) => {
           const { messages, nextCursor, senders } =
             normalizeGroupMessagesPage(raw);
           loadHistory(conversationId, messages);
-          if (senders.length > 0) mergeConnections(senders);
-          paginationRef.current[conversationId] = {
+          if (senders.length > 0) mergeUsers(senders);
+          setPaginationState(conversationId, {
             nextCursor,
             hasMore: nextCursor !== null,
             isLoading: false,
-          };
+          });
         })
         .catch((err) => {
           console.error("Failed to load group history:", err);
-          loadedInitialRef.current.delete(conversationId);
+          unmarkLoadedInitial(conversationId);
         });
     }
 
@@ -70,10 +73,10 @@ export default function GroupChatWindow({
   const loadOlderMessages = useCallback(async () => {
     if (!conversationId) return;
 
-    const pageState = paginationRef.current[conversationId];
+    const pageState = getPaginationState(conversationId);
     if (!pageState || !pageState.hasMore || pageState.isLoading) return;
 
-    pageState.isLoading = true;
+    setPaginationState(conversationId, { ...pageState, isLoading: true });
 
     const el = scrollContainerRef.current;
     const prevScrollHeight = el?.scrollHeight ?? 0;
@@ -85,17 +88,14 @@ export default function GroupChatWindow({
       const { messages, nextCursor, senders } = normalizeGroupMessagesPage(raw);
 
       prependHistory(conversationId, messages);
-      if (senders.length > 0) mergeConnections(senders);
+      if (senders.length > 0) mergeUsers(senders);
 
-      paginationRef.current[conversationId] = {
+      setPaginationState(conversationId, {
         nextCursor,
         hasMore: nextCursor !== null,
         isLoading: false,
-      };
+      });
 
-      // Preserve scroll position — older messages were just inserted
-      // ABOVE the current view, so without this the browser keeps
-      // scrollTop fixed and the view jumps down by whatever was added.
       requestAnimationFrame(() => {
         if (el) {
           const newScrollHeight = el.scrollHeight;
@@ -106,7 +106,7 @@ export default function GroupChatWindow({
       console.error("Failed to load older group messages:", err);
       pageState.isLoading = false;
     }
-  }, [conversationId, prependHistory, mergeConnections]);
+  }, [conversationId, prependHistory, mergeUsers]);
 
   const handleScroll = () => {
     const el = scrollContainerRef.current;
@@ -124,6 +124,7 @@ export default function GroupChatWindow({
 
   const entry = state[conversationId];
   const groupName = entry?.groupInfo?.name ?? "Group";
+  const memberCount = entry?.groupInfo?.members.length ?? 0;
 
   return (
     <>
@@ -157,9 +158,25 @@ export default function GroupChatWindow({
             <path d="m15 18-6-6 6-6" />
           </svg>
         </button>
-        <Avatar name={groupName} size={50} />
-        <div>
-          <div>{groupName}</div>
+
+        {/* Clicking the group identity opens GroupInfoPanel — same pattern
+            as tapping a contact's name in most chat apps. */}
+        <div
+          onClick={() => setShowGroupInfo(true)}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            cursor: "pointer",
+          }}
+        >
+          <Avatar name={groupName} size={50} />
+          <div>
+            <div>{groupName}</div>
+            <div style={{ fontSize: 12, color: colorScheme.textSecondary }}>
+              {memberCount} member{memberCount === 1 ? "" : "s"}
+            </div>
+          </div>
         </div>
       </div>
 

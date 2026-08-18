@@ -18,6 +18,7 @@ import { useConversation } from "../../../contexts/ConversationContext";
 import ProfilePanel from "../freinds-pages/components/ProfilePanel";
 import GroupChatPanel from "../group-chat/GroupChatPanel";
 import GroupChatWindow from "../group-chat/components/GroupChatWindow";
+import GroupInfoPanel from "../group-chat/GroupInfoPanel";
 
 export default function Chat() {
   const navigate = useNavigate();
@@ -30,6 +31,8 @@ export default function Chat() {
     setSelectedConversationId,
     selectedUserProfile,
     setSelectedUserProfile,
+    showGroupInfo,
+    setShowGroupInfo,
   } = useConversation();
 
   const [initialLoading, setInitialLoading] = useState(true);
@@ -40,15 +43,20 @@ export default function Chat() {
     }
   }, [user, authLoading, navigate]);
 
-  // Chats, Friends, and Group chat currently share the same
-  // selectedConversationId/selectedUserProfile state (ConversationContext
-  // isn't view-scoped). Without this, leaving a DM open and switching to
-  // "Group chat" would try to render that DM's id as a group. Clearing on
-  // every view switch keeps each tab starting from its own empty state.
+  // Chats, Friends, and Group chat share ConversationContext's selection
+  // state. Clearing it on every view switch keeps each tab starting from
+  // its own empty state instead of leaking a DM/group id or an open
+  // group-info panel across views.
   useEffect(() => {
     setSelectedConversationId(null);
     setSelectedUserProfile(null);
-  }, [activeView, setSelectedConversationId, setSelectedUserProfile]);
+    setShowGroupInfo(false);
+  }, [
+    activeView,
+    setSelectedConversationId,
+    setSelectedUserProfile,
+    setShowGroupInfo,
+  ]);
 
   useEffect(() => {
     if (!user) return;
@@ -76,9 +84,6 @@ export default function Chat() {
     return <div className={styles.loadingScreen}>Loading chats...</div>;
   }
 
-  // On mobile, this class flips the layout to show only the chat pane
-  // instead of both panes at once. Extended to cover "groups" too — a
-  // selected group behaves the same as a selected DM conversation here.
   const pageClassName = [
     styles.chatPage,
     (activeView === "chats" && selectedConversationId) ||
@@ -116,6 +121,8 @@ export default function Chat() {
       <div className={styles.chatPane}>
         {activeView === "friends" && selectedUserProfile ? (
           <ProfilePanel />
+        ) : activeView === "groups" && showGroupInfo ? (
+          <GroupInfoPanel />
         ) : activeView === "groups" ? (
           <GroupChatWindow
             conversationId={selectedConversationId}

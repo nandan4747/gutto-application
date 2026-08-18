@@ -11,8 +11,13 @@ import type { Connection } from "./RelationProvider";
 
 interface PseudoConnectionContextType {
   getCachedUser: (id: string) => Connection | undefined;
-
   fetchUser: (id: string) => Promise<Connection | null>;
+  // NEW: seeds the cache directly with data you already have in hand
+  // (e.g. group members from getUserGroups(), or message senders from
+  // a populated senderUserId) — no network call, just like
+  // RelationProvider's mergeConnections but for people who AREN'T
+  // necessarily friends.
+  mergeUsers: (people: Connection[]) => void;
 }
 
 const PseudoConnectionContext = createContext<
@@ -25,11 +30,19 @@ export function PseudoConnectionProvider({
   children: ReactNode;
 }) {
   const [cache, setCache] = useState<Map<string, Connection>>(new Map());
-  // Tracks requests currently in flight so concurrent callers for the
-  // same id piggyback on one fetch instead of duplicating it.
   const pendingRef = useRef<Map<string, Promise<Connection | null>>>(new Map());
 
   const getCachedUser = useCallback((id: string) => cache.get(id), [cache]);
+
+  const mergeUsers = useCallback((people: Connection[]) => {
+    setCache((prev) => {
+      const next = new Map(prev);
+      for (const person of people) {
+        next.set(person._id, person);
+      }
+      return next;
+    });
+  }, []);
 
   const fetchUser = useCallback(
     async (id: string): Promise<Connection | null> => {
@@ -63,7 +76,9 @@ export function PseudoConnectionProvider({
   );
 
   return (
-    <PseudoConnectionContext.Provider value={{ getCachedUser, fetchUser }}>
+    <PseudoConnectionContext.Provider
+      value={{ getCachedUser, fetchUser, mergeUsers }}
+    >
       {children}
     </PseudoConnectionContext.Provider>
   );
