@@ -14,3 +14,18 @@ export const getUserProfile = async (userId: string) => {
   });
   return handle(res);
 };
+
+export const deleteMessageApi = async (messageId: string): Promise<void> => {
+  const response = await fetch(`${BASE}/chat/${messageId}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || "Failed to delete message");
+  }
+};

@@ -3,10 +3,7 @@ import { useAuth } from "../../../contexts/AuthProvider";
 import { useEffect, useState } from "react";
 import { useMessages } from "../../../contexts/MessageProvider";
 import { getConversations } from "./api";
-import {
-  normalizeConversations,
-  normalizeUnreadCounts,
-} from "./utils/normalize";
+import { normalizeConversations } from "./utils/normalize";
 import { useChatSocket } from "./hooks/Usechatsocket";
 import ConversationList from "./components/Conversationlist";
 import ChatWindow from "./components/ChatWindow";
@@ -19,6 +16,7 @@ import ProfilePanel from "../freinds-pages/components/ProfilePanel";
 import GroupChatPanel from "../group-chat/GroupChatPanel";
 import GroupChatWindow from "../group-chat/components/GroupChatWindow";
 import GroupInfoPanel from "../group-chat/GroupInfoPanel";
+import ProfileSettingsPanel from "../profile-page/ProfileSettingsPanel";
 
 export default function Chat() {
   const navigate = useNavigate();
@@ -82,6 +80,22 @@ export default function Chat() {
 
   if (authLoading || initialLoading) {
     return <div className={styles.loadingScreen}>Loading chats...</div>;
+  }
+
+  // Profile is a full-width settings page, not a sidebar+detail split
+  // like the other views — bail out of the two-pane layout entirely.
+  if (activeView === "profile") {
+    return (
+      <div
+        style={{
+          backgroundColor: colorScheme.background,
+          color: colorScheme.text,
+          height: "100%",
+        }}
+      >
+        <ProfileSettingsPanel />
+      </div>
+    );
   }
 
   const pageClassName = [

@@ -14,6 +14,7 @@ export function useChatSocket() {
     addOptimisticMessage,
     confirmSentMessage,
     markMessageFailed,
+    deleteMessage,
   } = useMessages();
 
   useEffect(() => {
@@ -72,6 +73,16 @@ export function useChatSocket() {
       console.warn("socket alert:", msg);
     };
 
+    const handleMessageDeleted = ({
+      conversationId,
+      messageId,
+    }: {
+      conversationId: string;
+      messageId: string;
+    }) => {
+      deleteMessage(conversationId, messageId);
+    };
+
     const handleError = (payload: { message: string }) => {
       console.error("socket error:", payload.message);
     };
@@ -80,6 +91,7 @@ export function useChatSocket() {
     socket.on("newGroupMessage", handleNewGroupMessage);
     socket.on("messageSent", handleMessageSent);
     socket.on("alerts", handleAlert);
+    socket.on("message_deleted", handleMessageDeleted);
     socket.on("error", handleError);
 
     return () => {
@@ -88,8 +100,15 @@ export function useChatSocket() {
       socket.off("messageSent", handleMessageSent);
       socket.off("alerts", handleAlert);
       socket.off("error", handleError);
+      socket.off("message_deleted", handleMessageDeleted);
     };
-  }, [socket, addIncomingMessage, confirmSentMessage, markMessageFailed]);
+  }, [
+    socket,
+    addIncomingMessage,
+    confirmSentMessage,
+    markMessageFailed,
+    deleteMessage,
+  ]);
 
   const sendMessage = useCallback(
     (params: {

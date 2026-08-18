@@ -21,6 +21,7 @@ export interface StoredMessage {
   senderId: string;
   createdAt: string;
   status: MessageStatus;
+  isDeleted?: boolean;
 }
 
 export interface ConversationEntry {
@@ -105,6 +106,10 @@ type Action =
   | {
       type: "REMOVE_CONVERSATION";
       payload: { conversationId: string };
+    }
+  | {
+      type: "DELETE_MESSAGE";
+      payload: { conversationId: string; messageId: string };
     };
 
 // ---------- Reducer ----------
@@ -290,6 +295,29 @@ function messageReducer(state: MessageState, action: Action): MessageState {
       return next;
     }
 
+    case "DELETE_MESSAGE": {
+      const { conversationId, messageId } = action.payload;
+      const existing = state[conversationId];
+      if (!existing) return state;
+
+      return {
+        ...state,
+        [conversationId]: {
+          ...existing,
+          messageList: existing.messageList.map((m) =>
+            m.messageId === messageId
+              ? {
+                  ...m,
+                  text: "This message was deleted by sender",
+                  isDeleted: true,
+                  url: undefined,
+                }
+              : m,
+          ),
+        },
+      };
+    }
+
     default:
       return state;
   }
@@ -337,6 +365,7 @@ interface MessageContextValue {
   unmarkLoadedInitial: (conversationId: string) => void; // retry after failed fetch
   getPaginationState: (conversationId: string) => PaginationState | undefined;
   setPaginationState: (conversationId: string, state: PaginationState) => void;
+  deleteMessage: (conversationId: string, messageId: string) => void;
 }
 
 const MessageContext = createContext<MessageContextValue | null>(null);
@@ -488,6 +517,16 @@ export function MessageProvider({ children }: { children: ReactNode }) {
     [],
   );
 
+  const deleteMessage = useCallback(
+    (conversationId: string, messageId: string) => {
+      dispatch({
+        type: "DELETE_MESSAGE",
+        payload: { conversationId, messageId },
+      });
+    },
+    [],
+  );
+
   return (
     <MessageContext.Provider
       value={{
@@ -510,6 +549,7 @@ export function MessageProvider({ children }: { children: ReactNode }) {
         unmarkLoadedInitial,
         getPaginationState,
         setPaginationState,
+        deleteMessage,
       }}
     >
       {children}

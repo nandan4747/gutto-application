@@ -70,7 +70,14 @@ const AppHeader: React.FC = () => {
       </div>
 
       <div className={styles.actions}>
-        <div className={styles.avatar}>
+        <div
+          className={styles.avatar}
+          onClick={() => setActiveView("profile")}
+          style={{
+            cursor: "pointer",
+            outline: activeView === "profile" ? "2px solid #0a84ff" : "none",
+          }}
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="24"

@@ -11,11 +11,17 @@ function App() {
   return (
     <ConversationProvider>
       <SocketProvider>
-        <div style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
+        <div
+          style={{
+            display: "flex",
+            height: "100vh",
+            overflow: "hidden",
+          }}
+        >
           <AppHeader />
 
           {/* The main chat area takes up the remaining space */}
-          <main style={{ flex: 1, overflow: "hidden" }}>
+          <main style={{ flex: 1 }}>
             <Routes>
               <Route path="/auth" element={<Auth />} />
               <Route element={<ProtectedRoute />}>
