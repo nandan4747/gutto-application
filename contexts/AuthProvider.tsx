@@ -3,7 +3,7 @@ import { API_DETAILS } from "../src/api/API_DETAILS";
 
 const AuthContext = createContext({
   user: null,
-  setUser: (user: any) => { },
+  setUser: (_user: any) => {},
   loading: true,
 });
 
