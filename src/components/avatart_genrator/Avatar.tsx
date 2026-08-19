@@ -1,5 +1,3 @@
-import React from "react";
-
 interface AvatarProps {
   name: string;
   size?: number; // Let's make it customizable so you can use it in diff places
