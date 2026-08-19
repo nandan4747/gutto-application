@@ -22,7 +22,7 @@ export default function Chat() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { hydrateConversations, applyUnreadCounts } = useMessages();
-  const { sendMessage } = useChatSocket();
+  const { sendMessage, sendFile } = useChatSocket();
   const { activeView } = useNavigationView();
   const {
     selectedConversationId,
@@ -141,12 +141,14 @@ export default function Chat() {
           <GroupChatWindow
             conversationId={selectedConversationId}
             onSendMessage={sendMessage}
+            onSendFile={sendFile}
             onBack={() => setSelectedConversationId(null)}
           />
         ) : (
           <ChatWindow
             conversationId={selectedConversationId}
             onSendMessage={sendMessage}
+            onSendFile={sendFile}
             onBack={() => setSelectedConversationId(null)}
           />
         )}

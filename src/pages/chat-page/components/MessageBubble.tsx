@@ -2,7 +2,11 @@ import { useState, useRef, useEffect } from "react";
 import { useAuth } from "../../../../contexts/AuthProvider";
 import type { StoredMessage } from "../../../../contexts/MessageProvider";
 import { colorScheme } from "../../../theme/colorScheme";
-import { deleteMessageApi } from "../../../api/globalApiFetch";
+import {
+  deleteMessageApi,
+  deleteFileMessageApi,
+} from "../../../api/globalApiFetch";
+import MessageContent from "./MessageContent";
 
 interface Props {
   message: StoredMessage;
@@ -40,7 +44,13 @@ export default function MessageBubble({ message }: Props) {
     e.stopPropagation();
     try {
       setIsDeleting(true);
-      await deleteMessageApi(message.messageId);
+      // File/image messages hit a separate route that also cleans up the
+      // Supabase object; plain text messages don't need that step.
+      if (message.type === "image" || message.type === "file") {
+        await deleteFileMessageApi(message.messageId);
+      } else {
+        await deleteMessageApi(message.messageId);
+      }
     } catch (error: any) {
       console.error("Delete failed:", error.message);
     } finally {
@@ -81,10 +91,7 @@ export default function MessageBubble({ message }: Props) {
           cursor: isOwn && !isDeleted ? "pointer" : "default",
         }}
       >
-        <div>
-          {isDeleted && <span style={{ marginRight: 6 }}>🚫</span>}
-          {message.text}
-        </div>
+        <MessageContent message={message} isDeleted={isDeleted} />
 
         {isOwn && !isDeleted && (
           <div style={{ fontSize: 10, marginTop: 4, opacity: 0.8 }}>

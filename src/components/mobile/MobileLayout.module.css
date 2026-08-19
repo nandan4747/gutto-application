@@ -1,0 +1,67 @@
+/* --- Mobile Header --- */
+.mobileHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 1rem;
+  height: 60px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.brand h1 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0;
+  color: white;
+  letter-spacing: 1px;
+}
+
+.activeTabTitle {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+/* --- Mobile Bottom Tabs --- */
+.mobileTabs {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  height: 65px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+
+  /* Prevents the tabs from being hidden under the iOS home bar */
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.tabButton {
+  background: none;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  /* Adds a subtle squish effect when tapped so the app feels alive */
+  transition: transform 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tabButton:active {
+  transform: scale(0.85);
+}

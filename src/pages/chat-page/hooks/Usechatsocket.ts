@@ -5,6 +5,7 @@ import {
   type MessageType,
 } from "../../../../contexts/MessageProvider";
 import { useAuth } from "../../../../contexts/AuthProvider";
+import { sendFileMessageApi } from "../../../api/globalApiFetch";
 
 export function useChatSocket() {
   const socket = useSocket();
@@ -32,6 +33,7 @@ export function useChatSocket() {
           text: payload.text,
           type: payload.type,
           url: payload.url,
+          fileName: payload.fileName,
           senderId: payload.from,
           createdAt: payload.createdAt,
         },
@@ -50,6 +52,7 @@ export function useChatSocket() {
           text: payload.text,
           type: payload.type,
           url: payload.url,
+          fileName: payload.fileName,
           senderId: payload.from,
           createdAt: payload.createdAt,
         },
@@ -152,5 +155,73 @@ export function useChatSocket() {
     [socket, user, addOptimisticMessage],
   );
 
-  return { sendMessage };
+  // File/image sends go over HTTP (multipart), not the socket — the
+  // server saves + broadcasts to the *receiver's* room only, so unlike
+  // text there's no "messageSent" echo back to us. We optimistically
+  // show a local blob preview immediately, then patch in the real
+  // Supabase URL once the upload response comes back.
+  const sendFile = useCallback(
+    async (params: {
+      receiverId: string;
+      isGroup: boolean;
+      file: File;
+      caption?: string;
+    }) => {
+      if (!user) return;
+
+      const currentUserId = (user as any).id ?? (user as any)._id;
+      const tempId = crypto.randomUUID();
+      const createdAt = new Date().toISOString();
+      const isImage = params.file.type.startsWith("image/");
+      const localPreviewUrl = isImage
+        ? URL.createObjectURL(params.file)
+        : undefined;
+      const conversationType = params.isGroup ? "group" : "dm";
+
+      addOptimisticMessage(
+        params.receiverId,
+        {
+          messageId: tempId,
+          tempId,
+          text: params.caption ?? "",
+          type: isImage ? "image" : "file",
+          url: localPreviewUrl,
+          fileName: params.file.name,
+          senderId: currentUserId,
+          createdAt,
+          status: "sending",
+        },
+        conversationType,
+      );
+
+      try {
+        const saved = await sendFileMessageApi({
+          receiverId: params.receiverId,
+          isGroup: params.isGroup,
+          file: params.file,
+          text: params.caption,
+        });
+
+        confirmSentMessage(
+          params.receiverId,
+          tempId,
+          saved._id,
+          saved.createdAt,
+          saved.url,
+        );
+
+        // Server URL is now in state — the blob preview is no longer
+        // referenced, safe to free it.
+        if (localPreviewUrl) URL.revokeObjectURL(localPreviewUrl);
+      } catch (err) {
+        console.error("File upload failed:", err);
+        markMessageFailed(params.receiverId, tempId);
+        // Leave the blob URL alive so the failed bubble can still show
+        // what was being sent.
+      }
+    },
+    [user, addOptimisticMessage, confirmSentMessage, markMessageFailed],
+  );
+
+  return { sendMessage, sendFile };
 }

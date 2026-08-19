@@ -4,7 +4,11 @@ import { useConnectedPeople } from "../../../../contexts/RelationProvider";
 import { usePseudoConnection } from "../../../../contexts/PseudoConnectionContext";
 import type { StoredMessage } from "../../../../contexts/MessageProvider";
 import { colorScheme } from "../../../theme/colorScheme";
-import { deleteMessageApi } from "../../../api/globalApiFetch";
+import {
+  deleteMessageApi,
+  deleteFileMessageApi,
+} from "../../../api/globalApiFetch";
+import MessageContent from "../../chat-page/components/MessageContent";
 
 interface Props {
   message: StoredMessage;
@@ -63,7 +67,11 @@ export default function GroupChatBubble({ message }: Props) {
     e.stopPropagation();
     try {
       setIsDeleting(true);
-      await deleteMessageApi(message.messageId);
+      if (message.type === "image" || message.type === "file") {
+        await deleteFileMessageApi(message.messageId);
+      } else {
+        await deleteMessageApi(message.messageId);
+      }
     } catch (error: any) {
       console.error("Delete failed:", error.message);
     } finally {
@@ -122,10 +130,7 @@ export default function GroupChatBubble({ message }: Props) {
           cursor: isOwn && !isDeleted ? "pointer" : "default",
         }}
       >
-        <div>
-          {isDeleted && <span style={{ marginRight: 6 }}>🚫</span>}
-          {message.text}
-        </div>
+        <MessageContent message={message} isDeleted={isDeleted} />
 
         {isOwn && !isDeleted && (
           <div style={{ fontSize: 10, marginTop: 4, opacity: 0.8 }}>

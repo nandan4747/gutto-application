@@ -67,6 +67,7 @@ export function normalizeChatHistoryPage(raw: {
       text: m.text,
       type: m.type ?? "text",
       url: m.url,
+      fileName: m.fileName,
       senderId: m.senderUserId,
       createdAt: m.createdAt,
       status: "sent",

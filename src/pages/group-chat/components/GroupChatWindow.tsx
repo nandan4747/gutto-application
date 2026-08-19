@@ -17,12 +17,19 @@ interface Props {
     text: string;
     isGroup: boolean;
   }) => void;
+  onSendFile: (params: {
+    receiverId: string;
+    isGroup: boolean;
+    file: File;
+    caption?: string;
+  }) => void;
   onBack: () => void;
 }
 
 export default function GroupChatWindow({
   conversationId,
   onSendMessage,
+  onSendFile,
   onBack,
 }: Props) {
   const {
@@ -196,6 +203,14 @@ export default function GroupChatWindow({
             receiverId: conversationId,
             text,
             isGroup: true,
+          })
+        }
+        onSendFile={(file, caption) =>
+          onSendFile({
+            receiverId: conversationId,
+            isGroup: true,
+            file,
+            caption,
           })
         }
       />

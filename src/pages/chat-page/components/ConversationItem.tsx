@@ -51,6 +51,16 @@ export default function ConversationItem({
   const displayName = knownName ?? (isResolving ? "..." : "Group");
   const lastMessage = entry.messageList[entry.messageList.length - 1];
 
+  // Image/file messages often have no caption, so falling back to
+  // `.text` alone would show a blank preview — label by type instead.
+  const previewText = !lastMessage
+    ? "No messages yet"
+    : lastMessage.type === "image"
+      ? lastMessage.text || "📷 Photo"
+      : lastMessage.type === "file"
+        ? lastMessage.text || `📎 ${lastMessage.fileName ?? "File"}`
+        : lastMessage.text;
+
   return (
     <div
       onClick={onClick}
@@ -94,7 +104,7 @@ export default function ConversationItem({
               textOverflow: "ellipsis",
             }}
           >
-            {lastMessage?.text ?? "No messages yet"}
+            {previewText}
           </div>
         </div>
       </div>

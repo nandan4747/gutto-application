@@ -72,6 +72,7 @@ export function normalizeGroupMessagesPage(raw: {
       text: m.text,
       type: m.type ?? "text",
       url: m.url,
+      fileName: m.fileName,
       senderId,
       createdAt: m.createdAt,
       status: "sent" as const,

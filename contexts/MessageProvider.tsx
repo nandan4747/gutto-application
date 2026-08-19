@@ -18,6 +18,7 @@ export interface StoredMessage {
   text: string;
   type: MessageType;
   url?: string;
+  fileName?: string;
   senderId: string;
   createdAt: string;
   status: MessageStatus;
@@ -80,6 +81,11 @@ type Action =
         tempId: string;
         realId: string;
         createdAt: string;
+        // File/image sends don't get a socket echo back to the sender
+        // (only the receiver's room is emitted to) — the server URL
+        // comes back in the HTTP response instead, so we patch it in
+        // here, replacing the local blob preview.
+        url?: string;
       };
     }
   | {
@@ -188,7 +194,8 @@ function messageReducer(state: MessageState, action: Action): MessageState {
     }
 
     case "CONFIRM_SENT_MESSAGE": {
-      const { conversationId, tempId, realId, createdAt } = action.payload;
+      const { conversationId, tempId, realId, createdAt, url } =
+        action.payload;
       const existing = state[conversationId];
       if (!existing) return state;
 
@@ -199,7 +206,13 @@ function messageReducer(state: MessageState, action: Action): MessageState {
           lastUpdated: createdAt,
           messageList: existing.messageList.map((m) =>
             m.tempId === tempId
-              ? { ...m, messageId: realId, status: "sent", createdAt }
+              ? {
+                  ...m,
+                  messageId: realId,
+                  status: "sent",
+                  createdAt,
+                  ...(url ? { url } : {}),
+                }
               : m,
           ),
         },
@@ -347,6 +360,7 @@ interface MessageContextValue {
     tempId: string,
     realId: string,
     createdAt: string,
+    url?: string,
   ) => void;
   markMessageFailed: (conversationId: string, tempId: string) => void;
   markConversationRead: (conversationId: string) => void;
@@ -432,10 +446,11 @@ export function MessageProvider({ children }: { children: ReactNode }) {
       tempId: string,
       realId: string,
       createdAt: string,
+      url?: string,
     ) => {
       dispatch({
         type: "CONFIRM_SENT_MESSAGE",
-        payload: { conversationId, tempId, realId, createdAt },
+        payload: { conversationId, tempId, realId, createdAt, url },
       });
     },
     [],
