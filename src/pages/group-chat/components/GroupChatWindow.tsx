@@ -9,6 +9,7 @@ import MessageInput from "../../chat-page/components/MessageInput";
 import styles from "../../chat-page/Chat.module.css";
 import { Avatar } from "../../../components/avatart_genrator/Avatar";
 import { colorScheme } from "../../../theme/colorScheme";
+import { useUIContext } from "../../../../contexts/UIContextProvider";
 
 interface Props {
   conversationId: string | null; // groupId
@@ -47,6 +48,8 @@ export default function GroupChatWindow({
   const { setShowGroupInfo } = useConversation();
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const { setCanShowAppHeader } = useUIContext();
 
   useEffect(() => {
     setActiveConversation(conversationId);
@@ -149,7 +152,10 @@ export default function GroupChatWindow({
         <button
           style={{ color: colorScheme.text }}
           className={styles.backButton}
-          onClick={onBack}
+          onClick={() => {
+            onBack();
+            setCanShowAppHeader(true);
+          }}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"

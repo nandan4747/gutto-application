@@ -4,6 +4,7 @@ import { colorScheme } from "../../../theme/colorScheme";
 import { Avatar } from "../../../components/avatart_genrator/Avatar";
 import { useConnectedPeople } from "../../../../contexts/RelationProvider";
 import { usePseudoConnection } from "../../../../contexts/PseudoConnectionContext";
+import { useUIContext } from "../../../../contexts/UIContextProvider";
 
 interface Props {
   conversationId: string;
@@ -20,6 +21,7 @@ export default function ConversationItem({
 }: Props) {
   const { getConnection } = useConnectedPeople();
   const { getCachedUser, fetchUser } = usePseudoConnection();
+  const { setCanShowAppHeader } = useUIContext();
 
   // Fallback chain for DMs: the conversation's own cached participant
   // info -> the shared "known people" cache (friends/group members) ->
@@ -63,7 +65,10 @@ export default function ConversationItem({
 
   return (
     <div
-      onClick={onClick}
+      onClick={() => {
+        onClick();
+        setCanShowAppHeader(false);
+      }}
       style={{
         padding: "12px 16px",
         cursor: "pointer",

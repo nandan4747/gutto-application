@@ -8,6 +8,7 @@ import { MessageProvider } from "../contexts/MessageProvider.tsx";
 import { NavigationProvider } from "../contexts/Navigationprovider.tsx";
 import { PseudoConnectionProvider } from "../contexts/PseudoConnectionContext.tsx";
 import { ConnectedPeopleProvider } from "../contexts/RelationProvider.tsx";
+import { UIContextProvider } from "../contexts/UIContextProvider.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <AuthProvider>
@@ -16,9 +17,11 @@ createRoot(document.getElementById("root")!).render(
         <NavigationProvider>
           <ConnectedPeopleProvider>
             <PseudoConnectionProvider>
-              <BrowserRouter>
-                <App />
-              </BrowserRouter>
+              <UIContextProvider>
+                <BrowserRouter>
+                  <App />
+                </BrowserRouter>
+              </UIContextProvider>
             </PseudoConnectionProvider>
           </ConnectedPeopleProvider>
         </NavigationProvider>

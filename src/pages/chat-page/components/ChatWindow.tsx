@@ -7,9 +7,9 @@ import MessageInput from "./MessageInput";
 import styles from "../Chat.module.css";
 import { useConnectedPeople } from "../../../../contexts/RelationProvider";
 import { usePseudoConnection } from "../../../../contexts/PseudoConnectionContext";
-
 import { Avatar } from "../../../components/avatart_genrator/Avatar";
 import { colorScheme } from "../../../theme/colorScheme";
+import { useUIContext } from "../../../../contexts/UIContextProvider";
 
 interface Props {
   conversationId: string | null;
@@ -52,6 +52,7 @@ export default function ChatWindow({
 
   const { getConnection } = useConnectedPeople();
   const { getCachedUser, fetchUser } = usePseudoConnection();
+  const { setCanShowAppHeader } = useUIContext();
 
   useEffect(() => {
     setActiveConversation(conversationId);
@@ -178,7 +179,10 @@ export default function ChatWindow({
         <button
           style={{ color: colorScheme.text }}
           className={styles.backButton}
-          onClick={onBack}
+          onClick={() => {
+            onBack();
+            setCanShowAppHeader(true);
+          }}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"

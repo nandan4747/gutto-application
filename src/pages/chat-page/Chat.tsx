@@ -17,6 +17,7 @@ import GroupChatPanel from "../group-chat/GroupChatPanel";
 import GroupChatWindow from "../group-chat/components/GroupChatWindow";
 import GroupInfoPanel from "../group-chat/GroupInfoPanel";
 import ProfileSettingsPanel from "../profile-page/ProfileSettingsPanel";
+import { useUIContext } from "../../../contexts/UIContextProvider";
 
 export default function Chat() {
   const navigate = useNavigate();
@@ -34,6 +35,13 @@ export default function Chat() {
   } = useConversation();
 
   const [initialLoading, setInitialLoading] = useState(true);
+
+  const { setCanShowAppHeader } = useUIContext();
+
+  useEffect(() => {
+    console.log("setting to true");
+    setCanShowAppHeader(true);
+  }, []);
 
   useEffect(() => {
     if (!authLoading && user === null) {

@@ -8,6 +8,7 @@ import GroupCard from "./components/GroupCard";
 import CreateGroupPanel from "./components/CreateGroupPanel";
 import styles from "./GroupChatPanel.module.css";
 import { colorScheme } from "../../theme/colorScheme";
+import { useUIContext } from "../../../contexts/UIContextProvider";
 
 interface Props {
   selectedConversationId: string | null;
@@ -23,6 +24,12 @@ export default function GroupChatPanel({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+
+  const { setCanShowAppHeader } = useUIContext();
+
+  useEffect(() => {
+    setCanShowAppHeader(true);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;

@@ -1,6 +1,7 @@
 import { useMessages } from "../../../../contexts/MessageProvider";
 import ConversationItem from "./ConversationItem";
 import { colorScheme } from "../../../theme/colorScheme";
+import { BrushCleaning } from "lucide-react";
 
 interface Props {
   selectedConversationId: string | null;
@@ -27,7 +28,19 @@ export default function ConversationList({
       }}
     >
       {conversations.length === 0 && (
-        <div style={{ padding: 16, color: colorScheme.textSecondary }}>
+        <div
+          style={{
+            padding: 16,
+            height: "100vh",
+            width: "100%",
+            color: colorScheme.textSecondary,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <BrushCleaning />
           No conversations yet
         </div>
       )}
