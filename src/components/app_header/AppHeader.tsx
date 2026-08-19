@@ -1,6 +1,6 @@
 import React from "react";
 import styles from "./AppHeader.module.css";
-import AppLogo from "../../assets/applogo.png";
+import AppLogo from "../../../public/applogo.png";
 import { colorScheme } from "../../theme/colorScheme";
 import { BookUser, Users, MessageCircle } from "lucide-react";
 import { useNavigationView } from "../../../contexts/Navigationprovider";
@@ -23,8 +23,8 @@ const AppHeader: React.FC = () => {
       className={styles.sidebar}
     >
       <div className={styles.brandContainer}>
-        <img src={AppLogo} alt="GUTTO Logo" className={styles.logo} />
-        <h1 className={styles.appName}>GUTTO</h1>
+        <img src={AppLogo} alt="EN SAMACHARA Logo" className={styles.logo} />
+        <h1 className={styles.appName}>EN SAMACHARA</h1>
       </div>
 
       <div

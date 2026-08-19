@@ -1,5 +1,5 @@
 import React from "react";
-import AppLogo from "../../assets/applogo.png";
+import AppLogo from "../../../public/applogo.png";
 import { useNavigationView } from "../../../contexts/Navigationprovider";
 import { colorScheme } from "../../theme/colorScheme";
 import styles from "./MobileLayout.module.css";
@@ -19,8 +19,8 @@ const MobileHeader: React.FC = () => {
       }}
     >
       <div className={styles.brand}>
-        <img src={AppLogo} alt="GUTTO Logo" className={styles.logo} />
-        <h1>GUTTO</h1>
+        <img src={AppLogo} alt="EN SAMACHARA Logo" className={styles.logo} />
+        <h1>EN SAMACHARA</h1>
       </div>
       <div
         className={styles.activeTabTitle}
