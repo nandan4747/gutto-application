@@ -1,51 +1,35 @@
 import React from "react";
-import { BookUser, Users, MessageCircle, User } from "lucide-react";
+import { MessageCircle, BookUser, Users, User } from "lucide-react";
 import { useNavigationView } from "../../../contexts/Navigationprovider";
-import { colorScheme } from "../../theme/colorScheme";
 import styles from "./MobileLayout.module.css";
+
+const TABS = [
+  { id: "chats", label: "Chats", Icon: MessageCircle },
+  { id: "friends", label: "Friends", Icon: BookUser },
+  { id: "groups", label: "Groups", Icon: Users },
+  { id: "profile", label: "Profile", Icon: User },
+] as const;
 
 const MobileTabs: React.FC = () => {
   const { activeView, setActiveView } = useNavigationView();
 
-  const getIconColor = (view: string) =>
-    activeView === view ? "#3d5afe" : colorScheme.textSecondary; // Use your primary blue
-
   return (
-    <div
-      className={styles.mobileTabs}
-      style={{
-        backgroundColor: colorScheme.background,
-        borderTop: `1px solid ${colorScheme.border}`,
-      }}
-    >
-      <button
-        onClick={() => setActiveView("chats")}
-        className={styles.tabButton}
-      >
-        <MessageCircle size={26} color={getIconColor("chats")} />
-      </button>
-
-      <button
-        onClick={() => setActiveView("friends")}
-        className={styles.tabButton}
-      >
-        <BookUser size={26} color={getIconColor("friends")} />
-      </button>
-
-      <button
-        onClick={() => setActiveView("groups")}
-        className={styles.tabButton}
-      >
-        <Users size={26} color={getIconColor("groups")} />
-      </button>
-
-      <button
-        onClick={() => setActiveView("profile")}
-        className={styles.tabButton}
-      >
-        <User size={26} color={getIconColor("profile")} />
-      </button>
-    </div>
+    <nav className={styles.mobileTabs}>
+      {TABS.map(({ id, label, Icon }) => {
+        const isActive = activeView === id;
+        return (
+          <button
+            key={id}
+            onClick={() => setActiveView(id)}
+            className={`${styles.tabButton} ${isActive ? styles.active : ""}`}
+            aria-label={label}
+          >
+            {isActive && <span className={styles.activeIndicator} />}
+            <Icon size={22} strokeWidth={isActive ? 2.2 : 1.75} />
+          </button>
+        );
+      })}
+    </nav>
   );
 };
 
