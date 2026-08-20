@@ -1,5 +1,6 @@
 import { useMessages } from "../../../../contexts/MessageProvider";
 import ConversationItem from "./ConversationItem";
+import ConversationSkeleton from "./ConversationSkeleton";
 import { colorScheme } from "../../../theme/colorScheme";
 import { BrushCleaning } from "lucide-react";
 
@@ -12,13 +13,18 @@ export default function ConversationList({
   selectedConversationId,
   onSelect,
 }: Props) {
-  const { state } = useMessages();
+  // Assumes MessageProvider exposes an `isLoading` flag alongside `state`.
+  // Rename this destructure if your provider calls it something else.
+  const { state, hasHydrated } = useMessages();
 
-  const conversations = Object.entries(state).sort(
-    ([, a], [, b]) =>
-      new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime(),
-  );
+  const conversations = Object.entries(state ?? {})
+    .filter(([, entry]) => entry.type === "dm")
+    .sort(
+      ([, a], [, b]) =>
+        new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime(),
+    );
 
+  let isLoading = !hasHydrated;
   return (
     <div
       style={{
@@ -27,7 +33,9 @@ export default function ConversationList({
         overflowY: "auto",
       }}
     >
-      {conversations.length === 0 && (
+      {isLoading && conversations.length === 0 && <ConversationSkeleton />}
+
+      {!isLoading && conversations.length === 0 && (
         <div
           style={{
             padding: 16,
@@ -44,6 +52,7 @@ export default function ConversationList({
           No conversations yet
         </div>
       )}
+
       {conversations.map(([conversationId, entry]) => (
         <ConversationItem
           key={conversationId}

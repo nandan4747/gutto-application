@@ -1,3 +1,4 @@
+import { apiFetch } from "../../utils/apiFetch";
 import { API_DETAILS } from "./API_DETAILS";
 
 const BASE = API_DETAILS.host;
@@ -9,19 +10,13 @@ async function handle(res: Response) {
   return res.json();
 }
 export const getUserProfile = async (userId: string) => {
-  const res = await fetch(`${BASE}/user/profile/${userId}`, {
-    credentials: "include",
-  });
+  const res = await apiFetch(`${BASE}/user/profile/${userId}`);
   return handle(res);
 };
 
 export const deleteMessageApi = async (messageId: string): Promise<void> => {
-  const response = await fetch(`${BASE}/chat/${messageId}`, {
+  const response = await apiFetch(`${BASE}/chat/${messageId}`, {
     method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
   });
 
   if (!response.ok) {
@@ -54,9 +49,8 @@ export const sendFileMessageApi = async (params: {
   formData.append("isGroup", String(params.isGroup));
   if (params.text) formData.append("text", params.text);
 
-  const response = await fetch(`${BASE}/chat/message/file`, {
+  const response = await apiFetch(`${BASE}/chat/message/file`, {
     method: "POST",
-    credentials: "include",
     body: formData,
   });
 
@@ -73,9 +67,8 @@ export const sendFileMessageApi = async (params: {
 export const deleteFileMessageApi = async (
   messageId: string,
 ): Promise<void> => {
-  const response = await fetch(`${BASE}/chat/message/file/${messageId}`, {
+  const response = await apiFetch(`${BASE}/chat/message/file/${messageId}`, {
     method: "DELETE",
-    credentials: "include",
   });
 
   if (!response.ok) {

@@ -2,6 +2,7 @@ import { createContext, useState, useEffect, useContext } from "react";
 import { useAuth } from "./AuthProvider";
 import { io, Socket } from "socket.io-client";
 import { BASE_URL } from "../src/api/API_DETAILS";
+import { getStoredToken } from "../utils/AuthToken";
 
 const SocketContext = createContext<Socket | null>(null);
 
@@ -15,8 +16,14 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
+    const token = getStoredToken();
+    if (!token) {
+      setSocket(null);
+      return;
+    }
+
     const s = io(BASE_URL, {
-      withCredentials: true,
+      auth: { token },
     });
 
     setSocket(s);

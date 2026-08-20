@@ -3,35 +3,46 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.5rem 1rem;
-  height: 60px;
+  padding: 0 1rem;
+  height: 52px;
   box-sizing: border-box;
   flex-shrink: 0;
+  background-color: #121212;
+  border-bottom: 1px solid #2a2a2a;
 }
 
 .brand {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .logo {
-  width: 32px;
-  height: 32px;
+  width: 22px;
+  height: 22px;
   object-fit: contain;
+  border-radius: 4px;
 }
 
-.brand h1 {
-  font-size: 1.25rem;
+.brandTitle {
+  font-size: 0.85rem;
   font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #ffffff;
   margin: 0;
-  color: white;
-  letter-spacing: 1px;
 }
 
-.activeTabTitle {
-  font-size: 1rem;
-  font-weight: 600;
+.separator {
+  color: #444444;
+  font-size: 0.85rem;
+  font-weight: 400;
+}
+
+.viewBreadcrumb {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #aaaaaa;
 }
 
 /* --- Mobile Bottom Tabs --- */

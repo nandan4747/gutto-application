@@ -5,6 +5,7 @@ import {
   useRef,
   useCallback,
   type ReactNode,
+  useState,
 } from "react";
 
 // ---------- Types ----------
@@ -34,11 +35,6 @@ export interface ConversationEntry {
   unreadedCount: number;
 }
 
-// Moved here from ChatWindow/GroupChatWindow — component-local useRef state
-// reset to empty on unmount/remount (e.g. switching away from a chat and
-// back), which re-triggered the initial-history fetch every time. Living on
-// the provider means it survives that. Refs, not state, so mutating them
-// never re-renders anything reading `state`.
 export interface PaginationState {
   nextCursor: string | null;
   hasMore: boolean;
@@ -194,8 +190,7 @@ function messageReducer(state: MessageState, action: Action): MessageState {
     }
 
     case "CONFIRM_SENT_MESSAGE": {
-      const { conversationId, tempId, realId, createdAt, url } =
-        action.payload;
+      const { conversationId, tempId, realId, createdAt, url } = action.payload;
       const existing = state[conversationId];
       if (!existing) return state;
 
@@ -341,6 +336,7 @@ function messageReducer(state: MessageState, action: Action): MessageState {
 interface MessageContextValue {
   state: MessageState;
   activeConversationRef: React.MutableRefObject<string | null>;
+  hasHydrated: boolean;
   hydrateConversations: (payload: MessageState) => void;
   applyUnreadCounts: (
     payload: { conversationId: string; count: number }[],
@@ -387,12 +383,7 @@ const MessageContext = createContext<MessageContextValue | null>(null);
 export function MessageProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(messageReducer, {});
   const activeConversationRef = useRef<string | null>(null);
-
-  // See PaginationState comment above — these survive ChatWindow /
-  // GroupChatWindow unmount+remount because they live here, not in the
-  // component. REMOVE_CONVERSATION (group deleted) should also clear
-  // these so a recreated group with the same-shaped state doesn't get
-  // stale pagination — handled in removeConversation below.
+  const [hasHydrated, setHasHydrated] = useState(false);
   const loadedInitialRef = useRef(new Set<string>());
   const paginationRef = useRef<Record<string, PaginationState>>({});
 
@@ -402,6 +393,7 @@ export function MessageProvider({ children }: { children: ReactNode }) {
 
   const hydrateConversations = useCallback((payload: MessageState) => {
     dispatch({ type: "HYDRATE_CONVERSATIONS", payload });
+    setHasHydrated(true);
   }, []);
 
   const applyUnreadCounts = useCallback(
@@ -547,6 +539,7 @@ export function MessageProvider({ children }: { children: ReactNode }) {
       value={{
         state,
         activeConversationRef,
+        hasHydrated,
         hydrateConversations,
         applyUnreadCounts,
         addIncomingMessage,

@@ -37,9 +37,13 @@ export default function Auth() {
         if ((response as any).error) {
           setError((response as any).error);
         } else {
-          setMessage(`Welcome back, ${response.username}!`);
-          setUser(response);
-          navigate("/", { replace: false });
+          // CHANGED: response is now { user, token } instead of just
+          // the user object — pass both to setUser so the token gets
+          // persisted.
+
+          setMessage(`Welcome back, ${response.user.username}!`);
+          setUser(response.user, response.token);
+          navigate("/", { replace: true });
         }
       } else {
         const registerData: RegisterData = {
@@ -53,9 +57,9 @@ export default function Auth() {
         if ((response as any).error) {
           setError((response as any).error);
         } else {
-          setMessage(`Registered successfully as ${response.username}.`);
-          setUser(response);
-          navigate("/", { replace: false });
+          setMessage(`Registered successfully as ${response.user.username}.`);
+          setUser(response.user, response.token);
+          navigate("/", { replace: true });
         }
       }
     } catch (submitError: any) {
@@ -185,52 +189,45 @@ export default function Auth() {
               style={{ backgroundColor: colorScheme.backgroundTertiary }}
               className={`${styles.formField} ${styles.accountTypeGroup}`}
             >
-              {mode === "register" && (
-                <div
-                  style={{ backgroundColor: colorScheme.backgroundTertiary }}
-                  className={`${styles.formField} ${styles.accountTypeGroup}`}
-                >
-                  <span>Account type</span>
+              <span>Account type</span>
 
-                  <div
-                    style={{ backgroundColor: colorScheme.backgroundSecondary }}
-                    className={styles.accountToggle}
-                  >
-                    <button
-                      type="button"
-                      style={{
-                        backgroundColor:
-                          accountType === "private"
-                            ? colorScheme.primary
-                            : "transparent",
-                        color:
-                          accountType === "private"
-                            ? "#ffffff"
-                            : colorScheme.textSecondary,
-                      }}
-                      onClick={() => setAccountType("private")}
-                    >
-                      Private
-                    </button>
-                    <button
-                      type="button"
-                      style={{
-                        backgroundColor:
-                          accountType === "public"
-                            ? colorScheme.primary
-                            : "transparent",
-                        color:
-                          accountType === "public"
-                            ? "#ffffff"
-                            : colorScheme.textSecondary,
-                      }}
-                      onClick={() => setAccountType("public")}
-                    >
-                      Public
-                    </button>
-                  </div>
-                </div>
-              )}
+              <div
+                style={{ backgroundColor: colorScheme.backgroundSecondary }}
+                className={styles.accountToggle}
+              >
+                <button
+                  type="button"
+                  style={{
+                    backgroundColor:
+                      accountType === "private"
+                        ? colorScheme.primary
+                        : "transparent",
+                    color:
+                      accountType === "private"
+                        ? "#ffffff"
+                        : colorScheme.textSecondary,
+                  }}
+                  onClick={() => setAccountType("private")}
+                >
+                  Private
+                </button>
+                <button
+                  type="button"
+                  style={{
+                    backgroundColor:
+                      accountType === "public"
+                        ? colorScheme.primary
+                        : "transparent",
+                    color:
+                      accountType === "public"
+                        ? "#ffffff"
+                        : colorScheme.textSecondary,
+                  }}
+                  onClick={() => setAccountType("public")}
+                >
+                  Public
+                </button>
+              </div>
             </div>
           )}
 

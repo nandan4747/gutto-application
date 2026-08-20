@@ -3,13 +3,9 @@ import { Pencil, Check, X } from "lucide-react";
 import { useAuth } from "../../../contexts/AuthProvider";
 import { Avatar } from "../../components/avatart_genrator/Avatar";
 import { colorScheme } from "../../theme/colorScheme";
-import {
-  updateFullname,
-  changePassword,
-  toggleAccountType,
-  logout,
-} from "./Api";
+import { updateFullname, changePassword, toggleAccountType } from "./Api";
 import styles from "./ProfileSettingsPanel.module.css";
+import { clearStoredToken } from "../../../utils/AuthToken";
 
 export default function ProfileSettingsPanel() {
   const { user, setUser } = useAuth();
@@ -125,10 +121,8 @@ export default function ProfileSettingsPanel() {
   const handleLogout = async () => {
     setLoggingOut(true);
     setLogoutError(null);
+    clearStoredToken();
     try {
-      await logout();
-      // Cookie's cleared server-side — reload instead of manually
-      // resetting every piece of client state.
       window.location.reload();
     } catch (err: any) {
       setLogoutError(err.message);

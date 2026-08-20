@@ -136,19 +136,26 @@ export default function ChatWindow({
 
   const entry = conversationId ? state[conversationId] : undefined;
 
+  // 2. Look up in friends list OR pseudo cache safely
   const knownConnection = conversationId
     ? (getConnection(conversationId) ?? getCachedUser(conversationId))
     : undefined;
-  const knownName =
-    entry?.type === "dm"
-      ? (entry.participant?.fullname ??
-        entry.participant?.username ??
-        knownConnection?.fullname ??
-        knownConnection?.username)
-      : entry?.groupInfo?.name;
+
+  const isGroup = entry?.type === "group";
+
+  // 2. Resolve display name (Group vs DM / Cache Fallback)
+  const knownName = isGroup
+    ? entry?.groupInfo?.name
+    : (entry?.participant?.fullname ??
+      entry?.participant?.username ??
+      knownConnection?.fullname ??
+      knownConnection?.username);
+
+  // 3. Resolve status indicator
+  const isResolving = !isGroup && !knownName;
 
   useEffect(() => {
-    if (!conversationId || entry?.type !== "dm" || knownName) return;
+    if (!conversationId || entry?.type === "group" || knownName) return;
     fetchUser(conversationId);
   }, [conversationId, entry?.type, knownName, fetchUser]);
 
@@ -160,7 +167,6 @@ export default function ChatWindow({
     );
   }
 
-  const isResolving = entry?.type === "dm" && !knownName;
   const displayName = knownName ?? (isResolving ? "..." : "Unknown");
 
   return (

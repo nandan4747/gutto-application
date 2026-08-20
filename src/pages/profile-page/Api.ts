@@ -1,3 +1,4 @@
+import { apiFetch } from "../../../utils/apiFetch";
 import { API_DETAILS } from "../../api/API_DETAILS";
 
 const BASE = `${API_DETAILS.host}/user`;
@@ -14,10 +15,9 @@ async function handle(res: Response) {
 
 // PUT /api/user/fullname  { fullname }
 export const updateFullname = async (fullname: string) => {
-  const res = await fetch(`${BASE}/fullname`, {
+  const res = await apiFetch(`${BASE}/fullname`, {
     method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
+
     body: JSON.stringify({ fullname }),
   });
   return handle(res);
@@ -28,10 +28,8 @@ export const changePassword = async (
   oldPassword: string,
   newPassword: string,
 ) => {
-  const res = await fetch(`${BASE}/password`, {
+  const res = await apiFetch(`${BASE}/password`, {
     method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
     body: JSON.stringify({ oldPassword, newPassword }),
   });
   return handle(res);
@@ -40,16 +38,14 @@ export const changePassword = async (
 // PUT /api/user/account-type/toggle
 // Response: { success, message, accountType: "private" | "public" }
 export const toggleAccountType = async () => {
-  const res = await fetch(`${BASE}/account-type/toggle`, {
+  const res = await apiFetch(`${BASE}/account-type/toggle`, {
     method: "PUT",
-    credentials: "include",
   });
   return handle(res);
 };
 export async function logout(): Promise<void> {
-  const res = await fetch(`${BASE}/logout`, {
+  const res = await apiFetch(`${BASE}/logout`, {
     method: "POST",
-    credentials: "include",
   });
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));

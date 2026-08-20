@@ -39,7 +39,7 @@ export default function Chat() {
   const { setCanShowAppHeader } = useUIContext();
 
   useEffect(() => {
-    console.log("setting to true");
+    //console.log("setting to true");
     setCanShowAppHeader(true);
   }, []);
 
@@ -49,10 +49,6 @@ export default function Chat() {
     }
   }, [user, authLoading, navigate]);
 
-  // Chats, Friends, and Group chat share ConversationContext's selection
-  // state. Clearing it on every view switch keeps each tab starting from
-  // its own empty state instead of leaking a DM/group id or an open
-  // group-info panel across views.
   useEffect(() => {
     setSelectedConversationId(null);
     setSelectedUserProfile(null);

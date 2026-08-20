@@ -11,7 +11,6 @@ import MobileTabs from "./components/mobile/MobileTabs.tsx";
 import { ConversationProvider } from "../contexts/ConversationContext.tsx";
 
 function App() {
-  // Check if screen is narrower than 768px (standard mobile/tablet breakpoint)
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   useEffect(() => {
@@ -26,17 +25,16 @@ function App() {
         <div
           style={{
             display: "flex",
-            // Desktop is row (sidebar on left), Mobile is column (header top, tabs bottom)
             flexDirection: isMobile ? "column" : "row",
-            height: "100vh",
+            height: "100dvh",
             overflow: "hidden",
           }}
         >
-          {/* Render appropriate navigation based on screen size */}
           {isMobile ? <MobileHeader /> : <AppHeader />}
 
           {/* Main chat area */}
-          <main style={{ flex: 1, overflowY: "auto", position: "relative" }}>
+          <main style={{ flex: 1, overflowY: "hidden", position: "relative" }}>
+            {" "}
             <Routes>
               <Route path="/auth" element={<Auth />} />
               <Route element={<ProtectedRoute />}>
@@ -45,7 +43,6 @@ function App() {
             </Routes>
           </main>
 
-          {/* Bottom navigation only shows on mobile */}
           {isMobile && <MobileTabs />}
         </div>
       </SocketProvider>

@@ -1,6 +1,6 @@
 import React from "react";
 import styles from "./AppHeader.module.css";
-import AppLogo from "../../../public/applogo.png";
+import AppLogo from "../../assets/applogo.png";
 import { colorScheme } from "../../theme/colorScheme";
 import { BookUser, Users, MessageCircle } from "lucide-react";
 import { useNavigationView } from "../../../contexts/Navigationprovider";

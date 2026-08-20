@@ -2,7 +2,7 @@
 
 .chatPage {
   display: flex;
-  height: 100vh;
+  height: 100%; /* <-- CHANGE THIS FROM 100vh */
   width: 100%;
   overflow: hidden;
 }
@@ -53,12 +53,6 @@
   font-size: 14px;
   cursor: pointer;
 }
-
-/* ---------- Mobile behavior ---------- */
-/* Below this width: show ONLY the sidebar by default, and ONLY the chat
-   pane once a conversation is selected (via the .conversationSelected
-   modifier on .chatPage). This mirrors WhatsApp Web / Telegram's mobile
-   layout instead of cramming both panes side by side on a small screen. */
 
 @media (max-width: 768px) {
   .sidebarPane {

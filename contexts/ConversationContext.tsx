@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { API_DETAILS } from "../src/api/API_DETAILS";
+import { apiFetch } from "../utils/apiFetch";
 
 export interface UserInfo {
   _id: string;
@@ -41,7 +42,7 @@ export function ConversationProvider({
 
   // Fetch blocked users from the API on mount so the list survives refreshes
   useEffect(() => {
-    fetch(`${API_DETAILS.host}/user/blocked`, { credentials: "include" })
+    apiFetch(`${API_DETAILS.host}/user/blocked`)
       .then((res) => (res.ok ? res.json() : []))
       .then((data) => setBlockedUsers(data))
       .catch(() => {
