@@ -1,0 +1,259 @@
+.aboutPage {
+  position: relative;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden; /* Prevents the whole page from scrolling */
+  background-color: #0a0b10; /* Fallback color */
+}
+
+/* Locks the canvas to the viewport so it never scrolls */
+.fixedBackground {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+/* The actual scrolling area */
+.scrollContainer {
+  position: relative;
+  z-index: 10;
+  height: 100vh;
+  width: 100%;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory; /* The magic that makes it snap */
+  scroll-behavior: smooth;
+}
+
+/* Each slide takes up exactly 100% of the screen height */
+.snapSection {
+  height: 100vh;
+  width: 100%;
+  scroll-snap-align: start; /* Where the snap locks into place */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 0 2rem;
+  box-sizing: border-box;
+}
+
+/* Keeps the text from getting too wide on large monitors */
+.contentMax {
+  width: 100%;
+  max-width: 900px;
+  animation: fadeUp 0.8s ease-out forwards;
+}
+
+.header {
+  margin-bottom: 2rem;
+}
+
+/* Larger Typography */
+.title {
+  font-size: 4.5rem; /* Massive presentation title */
+  font-weight: 800;
+  letter-spacing: 2px;
+  margin: 0 0 1rem 0;
+  color: white;
+}
+
+.subtitle {
+  font-size: 1.75rem;
+  margin: 0;
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+.section {
+  margin-bottom: 3rem;
+}
+
+.section h2 {
+  font-size: 2.5rem;
+  margin-bottom: 1.5rem;
+  color: #ffffff;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 0.5rem;
+}
+
+.section p {
+  line-height: 1.8;
+  color: #e2e8f0;
+  font-size: 1.35rem; /* Much easier to read from a distance */
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+}
+
+/* Tech Stack Grid - Spaced out for the slide */
+.techGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+}
+
+.techItem {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.techText h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.75rem;
+  color: #ffffff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.techText p {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #cbd5e1;
+  line-height: 1.6;
+}
+
+/* Warning Box - Upscaled */
+.warningBox {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.5rem;
+  background: rgba(255, 77, 79, 0.08);
+  border-left: 6px solid #ff4d4f;
+  padding: 2rem;
+  border-radius: 0 12px 12px 0;
+  margin-bottom: 4rem;
+}
+
+.warningIcon {
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.warningText h3 {
+  margin: 0 0 0.75rem 0;
+  color: #ff4d4f;
+  font-size: 1.5rem;
+}
+
+.warningText p {
+  margin: 0;
+  font-size: 1.15rem;
+  color: #ffcccc;
+  line-height: 1.6;
+}
+
+/* Call to Action Button */
+.ctaButton {
+  display: block;
+  width: 100%;
+  max-width: 300px;
+  padding: 1.25rem;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #fefefe;
+  background: #6a00ff50;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin: 0 auto; /* Centers the button on the slide */
+}
+
+.ctaButton:hover {
+  background: #fbfbfc;
+  color: blue;
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(30, 142, 255, 0.4);
+}
+
+.ctaButton:active {
+  transform: translateY(0);
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media screen and (max-width: 768px) {
+  /* Give the content a bit more breathing room on the edges */
+  .snapSection {
+    padding: 0 1.25rem;
+  }
+
+  /* Tame the massive presentation fonts */
+  .title {
+    font-size: 2.5rem;
+  }
+
+  .subtitle {
+    font-size: 1.15rem;
+  }
+
+  .section h2 {
+    font-size: 1.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .section p {
+    font-size: 1.05rem;
+    line-height: 1.6;
+  }
+
+  /* Compress the tech grid so it doesn't push off the screen */
+  .techGrid {
+    gap: 1.5rem;
+  }
+
+  .techItem {
+    gap: 1rem;
+    align-items: flex-start; /* Keeps the icon at the top if text wraps */
+  }
+
+  .techText h3 {
+    font-size: 1.25rem;
+  }
+
+  .techText p {
+    font-size: 0.95rem;
+  }
+
+  /* Stack the warning icon and text nicely on small screens */
+  .warningBox {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    border-left: none;
+    border-top: 6px solid #ff4d4f; /* Move border to top for stacked look */
+    border-radius: 0 0 12px 12px;
+    margin-bottom: 3rem;
+  }
+
+  .warningIcon {
+    margin-top: 0;
+  }
+
+  .warningText h3 {
+    font-size: 1.2rem;
+  }
+
+  .warningText p {
+    font-size: 0.95rem;
+  }
+
+  /* Make the button stretch to feel like a native mobile app */
+  .ctaButton {
+    max-width: 100%;
+    padding: 1rem;
+    font-size: 1.15rem;
+  }
+}

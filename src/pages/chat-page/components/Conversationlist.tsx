@@ -3,6 +3,9 @@ import ConversationItem from "./ConversationItem";
 import ConversationSkeleton from "./ConversationSkeleton";
 import { colorScheme } from "../../../theme/colorScheme";
 import { BrushCleaning } from "lucide-react";
+import TypewriterText from "../../../components/animated/TypewriterText";
+import { screen } from "../../../../utils/scope";
+import { GradientBackground } from "../../../components/background/GradientBackground";
 
 interface Props {
   selectedConversationId: string | null;
@@ -38,7 +41,6 @@ export default function ConversationList({
       {!isLoading && conversations.length === 0 && (
         <div
           style={{
-            padding: 16,
             height: "100vh",
             width: "100%",
             color: colorScheme.textSecondary,
@@ -48,8 +50,37 @@ export default function ConversationList({
             justifyContent: "center",
           }}
         >
-          <BrushCleaning />
-          No conversations yet
+          {screen.isMobile && <GradientBackground />}
+          {screen.isMobile && (
+            <TypewriterText
+              text=" No conversations yet...."
+              speed={60}
+              cursorColor={colorScheme.primary} // Matches the aura purple theme
+              style={{
+                position: "relative",
+                zIndex: 10,
+                fontSize: "1.25rem",
+                fontFamily: "monospace",
+                color: "#e2e8f0",
+                letterSpacing: "0.5px",
+                fontWeight: 600,
+              }}
+            />
+          )}
+
+          {!screen.isMobile && (
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+
+                alignItems: "center",
+              }}
+            >
+              <BrushCleaning />
+              No conversations yet
+            </div>
+          )}
         </div>
       )}
 

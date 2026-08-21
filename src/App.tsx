@@ -9,9 +9,13 @@ import AppHeader from "./components/app_header/AppHeader.tsx";
 import MobileHeader from "./components/mobile/MobileHeader.tsx";
 import MobileTabs from "./components/mobile/MobileTabs.tsx";
 import { ConversationProvider } from "../contexts/ConversationContext.tsx";
+import { screen } from "../utils/scope.ts";
+import About from "./pages/about-page/About.tsx";
 
 function App() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  screen.isMobile = isMobile;
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
@@ -40,6 +44,7 @@ function App() {
               <Route element={<ProtectedRoute />}>
                 <Route path="/" element={<Chat />} />
               </Route>
+              <Route path="/about" element={<About />} />
             </Routes>
           </main>
 

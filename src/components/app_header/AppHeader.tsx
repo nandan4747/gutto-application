@@ -2,17 +2,23 @@ import React from "react";
 import styles from "./AppHeader.module.css";
 import AppLogo from "../../assets/applogo.png";
 import { colorScheme } from "../../theme/colorScheme";
-import { BookUser, Users, MessageCircle } from "lucide-react";
+import { BookUser, Users, MessageCircle, Info } from "lucide-react";
 import { useNavigationView } from "../../../contexts/Navigationprovider";
+import { useUIContext } from "../../../contexts/UIContextProvider";
+import { useNavigate } from "react-router-dom";
 
 const AppHeader: React.FC = () => {
   const { activeView, setActiveView } = useNavigationView();
-
+  const { canShowDesktopHeader } = useUIContext();
   const navItemStyle = (view: typeof activeView) => ({
     background: activeView === view ? colorScheme.selected : "transparent",
     cursor: "pointer",
     borderRadius: 8,
   });
+  const nav = useNavigate();
+  if (!canShowDesktopHeader) {
+    return null;
+  }
 
   return (
     <div
@@ -66,6 +72,16 @@ const AppHeader: React.FC = () => {
           style={{ color: colorScheme.textSecondary }}
         >
           Group chat
+        </p>
+      </div>
+
+      <div className={styles.navActions} onClick={() => nav("/about")}>
+        <Info className={styles.navOptions} size={24} />
+        <p
+          className={styles.nav_label}
+          style={{ color: colorScheme.textSecondary }}
+        >
+          About
         </p>
       </div>
 

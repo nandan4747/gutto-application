@@ -1,0 +1,13 @@
+.canvas {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+
+  --gradient-color-1: #8504ff; /* Dark Base */
+  --gradient-color-2: #000000; /* Deep Forest */
+  --gradient-color-3: #040404; /* Deep Teal */
+  --gradient-color-4: #0f00b6; /* Slate Anchor */
+}

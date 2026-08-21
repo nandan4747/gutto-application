@@ -18,6 +18,7 @@ import GroupChatWindow from "../group-chat/components/GroupChatWindow";
 import GroupInfoPanel from "../group-chat/GroupInfoPanel";
 import ProfileSettingsPanel from "../profile-page/ProfileSettingsPanel";
 import { useUIContext } from "../../../contexts/UIContextProvider";
+import { HashLoader } from "react-spinners";
 
 export default function Chat() {
   const navigate = useNavigate();
@@ -83,11 +84,22 @@ export default function Chat() {
   }, [user, hydrateConversations, applyUnreadCounts]);
 
   if (authLoading || initialLoading) {
-    return <div className={styles.loadingScreen}>Loading chats...</div>;
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100%",
+          width: "100%",
+          backgroundColor: colorScheme.background,
+        }}
+      >
+        <HashLoader color={colorScheme.primary} />
+      </div>
+    );
   }
 
-  // Profile is a full-width settings page, not a sidebar+detail split
-  // like the other views — bail out of the two-pane layout entirely.
   if (activeView === "profile") {
     return (
       <div

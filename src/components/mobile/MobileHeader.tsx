@@ -3,10 +3,14 @@ import AppLogo from "../../assets/applogo.png";
 import { useNavigationView } from "../../../contexts/Navigationprovider";
 import { useUIContext } from "../../../contexts/UIContextProvider";
 import styles from "./MobileLayout.module.css";
+import { Info } from "lucide-react";
+import { colorScheme } from "../../theme/colorScheme";
+import { useNavigate } from "react-router-dom";
 
 const MobileHeader: React.FC = () => {
-  const { canShowAppHeader } = useUIContext();
+  const { canShowAppHeader, setCanShowAppHeader } = useUIContext();
   const { activeView } = useNavigationView();
+  const nav = useNavigate();
 
   const viewTitle = activeView.charAt(0).toUpperCase() + activeView.slice(1);
 
@@ -19,6 +23,14 @@ const MobileHeader: React.FC = () => {
         <h1 className={styles.brandTitle}>EN SAMACHARA</h1>
         <span className={styles.separator}>/</span>
         <span className={styles.viewBreadcrumb}>{viewTitle}</span>
+      </div>
+      <div
+        onClick={() => {
+          nav("/about");
+          setCanShowAppHeader(false);
+        }}
+      >
+        <Info style={{ color: colorScheme.text }} size={15}></Info>
       </div>
     </header>
   );

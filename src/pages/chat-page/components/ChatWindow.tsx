@@ -11,6 +11,7 @@ import { Avatar } from "../../../components/avatart_genrator/Avatar";
 import { colorScheme } from "../../../theme/colorScheme";
 import { useUIContext } from "../../../../contexts/UIContextProvider";
 
+import EmptyChatState from "../../../components/chatState/EmptyChatState";
 interface Props {
   conversationId: string | null;
   onSendMessage: (params: {
@@ -161,8 +162,8 @@ export default function ChatWindow({
 
   if (!conversationId) {
     return (
-      <div className={styles.emptyState}>
-        Select a conversation to start chatting
+      <div style={{}}>
+        <EmptyChatState />
       </div>
     );
   }
