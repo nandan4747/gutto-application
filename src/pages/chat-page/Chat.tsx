@@ -56,9 +56,17 @@ export default function Chat() {
   }, [user, authLoading, navigate]);
 
   useEffect(() => {
-    setSelectedConversationId(null);
-    setSelectedUserProfile(null);
-    setShowGroupInfo(false);
+    if (activeView !== "chats" && activeView !== "groups") {
+      setSelectedConversationId(null);
+    }
+
+    if (activeView !== "friends") {
+      setSelectedUserProfile(null);
+    }
+
+    if (activeView !== "groups") {
+      setShowGroupInfo(false);
+    }
   }, [
     activeView,
     setSelectedConversationId,

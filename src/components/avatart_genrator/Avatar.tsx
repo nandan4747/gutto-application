@@ -1,6 +1,7 @@
 interface AvatarProps {
   name: string;
   size?: number; // Let's make it customizable so you can use it in diff places
+  onClick?: () => void;
 }
 
 // Magically turns a string into a consistent hex color. Don't look too closely at the bitwise math, just trust it.
@@ -25,7 +26,7 @@ const getInitials = (name: string) => {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 };
 
-export const Avatar = ({ name, size = 48 }: AvatarProps) => {
+export const Avatar = ({ name, size = 48, onClick }: AvatarProps) => {
   const backgroundColor = stringToColor(name);
   const initials = getInitials(name);
 
@@ -46,6 +47,7 @@ export const Avatar = ({ name, size = 48 }: AvatarProps) => {
         textTransform: "uppercase",
       }}
       title={name}
+      onClick={onClick}
     >
       {initials}
     </div>

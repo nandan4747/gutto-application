@@ -12,6 +12,8 @@ import { colorScheme } from "../../../theme/colorScheme";
 import { useUIContext } from "../../../../contexts/UIContextProvider";
 
 import EmptyChatState from "../../../components/chatState/EmptyChatState";
+import { useConversation } from "../../../../contexts/ConversationContext";
+import { useNavigationView } from "../../../../contexts/Navigationprovider";
 interface Props {
   conversationId: string | null;
   onSendMessage: (params: {
@@ -54,6 +56,8 @@ export default function ChatWindow({
   const { getConnection } = useConnectedPeople();
   const { getCachedUser, fetchUser } = usePseudoConnection();
   const { setCanShowAppHeader } = useUIContext();
+  const { setSelectedUserProfile } = useConversation();
+  const { setActiveView } = useNavigationView();
 
   useEffect(() => {
     setActiveConversation(conversationId);
@@ -205,7 +209,22 @@ export default function ChatWindow({
             <path d="m15 18-6-6 6-6" />
           </svg>
         </button>
-        <Avatar name={isResolving ? "?" : displayName} size={50} />
+        <Avatar
+          name={isResolving ? "?" : displayName}
+          size={50}
+          onClick={async () => {
+            let con: any;
+            con = getCachedUser(conversationId);
+            if (!con) {
+              con = await fetchUser(conversationId);
+              setSelectedUserProfile(con);
+              setActiveView("friends");
+            } else {
+              setSelectedUserProfile(con);
+              setActiveView("friends");
+            }
+          }}
+        />
         {displayName}
       </div>
 
