@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { login, register } from "./api";
 import type { LoginData, RegisterData } from "./types";
 import styles from "./Auth.module.css";
 import { useAuth } from "../../../contexts/AuthProvider";
 import { useNavigate } from "react-router-dom";
 import { colorScheme } from "../../theme/colorScheme";
+import { isUserAlreadyVisted } from "../../../utils/freshUser";
 export default function Auth() {
   const navigate = useNavigate();
   const [mode, setMode] = useState<"login" | "register">("login");
@@ -18,6 +19,14 @@ export default function Auth() {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    setCanShowAppHeader(false);
+    const userStuff = isUserAlreadyVisted();
+    if (!userStuff) {
+      navigate("/about");
+    }
+  }, []);
 
   const resetMessages = () => {
     setMessage(null);
@@ -249,4 +258,7 @@ export default function Auth() {
       </div>
     </div>
   );
+}
+function setCanShowAppHeader(arg0: boolean) {
+  throw new Error("Function not implemented.");
 }

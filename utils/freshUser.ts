@@ -1,7 +1,7 @@
 export const isUserAlreadyVisted = () => {
-  console.log("checking new user");
+  //console.log("checking new user");
   const isAlreadyVisited = localStorage.getItem("new_user") || false;
-  console.log(`isAlreadyVisited ${isAlreadyVisited}`);
+  //console.log(`isAlreadyVisited ${isAlreadyVisited}`);
   return isAlreadyVisited;
 };
 export const markUserAsVisted = () => {
