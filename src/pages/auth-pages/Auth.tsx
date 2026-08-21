@@ -21,7 +21,6 @@ export default function Auth() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    setCanShowAppHeader(false);
     const userStuff = isUserAlreadyVisted();
     if (!userStuff) {
       navigate("/about");
@@ -258,7 +257,4 @@ export default function Auth() {
       </div>
     </div>
   );
-}
-function setCanShowAppHeader(arg0: boolean) {
-  throw new Error("Function not implemented.");
 }
