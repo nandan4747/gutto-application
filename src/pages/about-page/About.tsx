@@ -5,12 +5,14 @@ import { GradientBackground } from "../../components/background/GradientBackgrou
 import { colorScheme } from "../../theme/colorScheme";
 import { useUIContext } from "../../../contexts/UIContextProvider";
 import styles from "./About.module.css";
+import { markUserAsVisted } from "../../../utils/freshUser";
 
 export default function About() {
   const { setCanShowDesktopHeader } = useUIContext();
   const navigate = useNavigate();
 
   useEffect(() => {
+    markUserAsVisted();
     setCanShowDesktopHeader(false);
 
     return () => {

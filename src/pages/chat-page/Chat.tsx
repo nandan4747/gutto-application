@@ -19,6 +19,7 @@ import GroupInfoPanel from "../group-chat/GroupInfoPanel";
 import ProfileSettingsPanel from "../profile-page/ProfileSettingsPanel";
 import { useUIContext } from "../../../contexts/UIContextProvider";
 import { HashLoader } from "react-spinners";
+import { isUserAlreadyVisted } from "../../../utils/freshUser";
 
 export default function Chat() {
   const navigate = useNavigate();
@@ -42,6 +43,10 @@ export default function Chat() {
   useEffect(() => {
     //console.log("setting to true");
     setCanShowAppHeader(true);
+    const userStuff = isUserAlreadyVisted();
+    if (!userStuff) {
+      navigate("/about");
+    }
   }, []);
 
   useEffect(() => {
