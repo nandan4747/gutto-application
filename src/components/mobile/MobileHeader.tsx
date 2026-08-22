@@ -1,5 +1,5 @@
 import React from "react";
-import AppLogo from "../../assets/applogo.png";
+import AppLogo from "../../assets/logo-bg-no.png";
 import { useNavigationView } from "../../../contexts/Navigationprovider";
 import { useUIContext } from "../../../contexts/UIContextProvider";
 import styles from "./MobileLayout.module.css";

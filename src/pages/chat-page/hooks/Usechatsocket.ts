@@ -6,6 +6,8 @@ import {
 } from "../../../../contexts/MessageProvider";
 import { useAuth } from "../../../../contexts/AuthProvider";
 import { sendFileMessageApi } from "../../../api/globalApiFetch";
+import { useConversation } from "../../../../contexts/ConversationContext";
+import applogo from "../../../assets/applogo.png";
 
 export function useChatSocket() {
   const socket = useSocket();
@@ -17,6 +19,8 @@ export function useChatSocket() {
     markMessageFailed,
     deleteMessage,
   } = useMessages();
+
+  const { selectedConversationId } = useConversation();
 
   useEffect(() => {
     if (!socket || !user) return;
@@ -39,11 +43,53 @@ export function useChatSocket() {
         },
         "dm",
       );
+      if (selectedConversationId != String(payload.from)) {
+        if (document.hidden) {
+          let isFlashing = false;
+          const originalTitle = document.title;
+
+          const flashInterval = setInterval(() => {
+            document.title = isFlashing ? "💬 New Message!" : originalTitle;
+            isFlashing = !isFlashing;
+          }, 1000);
+
+          const onVisibilityChange = () => {
+            if (!document.hidden) {
+              clearInterval(flashInterval);
+              document.title = originalTitle;
+              document.removeEventListener(
+                "visibilitychange",
+                onVisibilityChange,
+              );
+            }
+          };
+
+          document.addEventListener("visibilitychange", onVisibilityChange);
+        } else {
+          if ("Notification" in window) {
+            const title = "New Message!";
+            const options = {
+              body:
+                payload.type === "text" ? payload.text : "Sent you a file 📁",
+              icon: applogo,
+              tag: String(payload.from),
+            };
+
+            if (Notification.permission === "granted") {
+              new Notification(title, options);
+            } else if (Notification.permission !== "denied") {
+              Notification.requestPermission().then((permission) => {
+                if (permission === "granted") {
+                  new Notification(title, options);
+                }
+              });
+            }
+          }
+        }
+      }
     };
 
     const handleNewGroupMessage = (payload: any) => {
-      // ASSUMPTION: payload includes groupId + from, matching the same
-      // shape as newMessage plus groupId. Adjust if backend differs.
       if (String(payload.from) === String(currentUserId)) return;
       addIncomingMessage(
         payload.groupId,
@@ -71,8 +117,6 @@ export function useChatSocket() {
     };
 
     const handleAlert = (msg: string) => {
-      // "account is private" / "Message not sent" (blocked) — surface via
-      // toast in whatever notification system you're using.
       console.warn("socket alert:", msg);
     };
 
@@ -126,8 +170,6 @@ export function useChatSocket() {
       const tempId = crypto.randomUUID();
       const createdAt = new Date().toISOString();
 
-      // Optimistic insert — shows up instantly, gets reconciled by
-      // handleMessageSent once the server confirms.
       addOptimisticMessage(
         params.receiverId,
         {
@@ -155,11 +197,6 @@ export function useChatSocket() {
     [socket, user, addOptimisticMessage],
   );
 
-  // File/image sends go over HTTP (multipart), not the socket — the
-  // server saves + broadcasts to the *receiver's* room only, so unlike
-  // text there's no "messageSent" echo back to us. We optimistically
-  // show a local blob preview immediately, then patch in the real
-  // Supabase URL once the upload response comes back.
   const sendFile = useCallback(
     async (params: {
       receiverId: string;

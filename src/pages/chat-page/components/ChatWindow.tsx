@@ -14,6 +14,7 @@ import { useUIContext } from "../../../../contexts/UIContextProvider";
 import EmptyChatState from "../../../components/chatState/EmptyChatState";
 import { useConversation } from "../../../../contexts/ConversationContext";
 import { useNavigationView } from "../../../../contexts/Navigationprovider";
+
 interface Props {
   conversationId: string | null;
   onSendMessage: (params: {
@@ -49,9 +50,9 @@ export default function ChatWindow({
     setPaginationState,
   } = useMessages();
 
-  // Only the scroll container stays local — it's a DOM handle for whichever
-  // instance is currently mounted, there's nothing to preserve across remounts.
+  // Scroll container for pagination, and an anchor ref for scrolling to the bottom
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const { getConnection } = useConnectedPeople();
   const { getCachedUser, fetchUser } = usePseudoConnection();
@@ -141,14 +142,21 @@ export default function ChatWindow({
 
   const entry = conversationId ? state[conversationId] : undefined;
 
-  // 2. Look up in friends list OR pseudo cache safely
+  const lastMessageId =
+    entry?.messageList?.[entry.messageList.length - 1]?.messageId;
+
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [lastMessageId]);
+
   const knownConnection = conversationId
     ? (getConnection(conversationId) ?? getCachedUser(conversationId))
     : undefined;
 
   const isGroup = entry?.type === "group";
 
-  // 2. Resolve display name (Group vs DM / Cache Fallback)
   const knownName = isGroup
     ? entry?.groupInfo?.name
     : (entry?.participant?.fullname ??
@@ -156,7 +164,6 @@ export default function ChatWindow({
       knownConnection?.fullname ??
       knownConnection?.username);
 
-  // 3. Resolve status indicator
   const isResolving = !isGroup && !knownName;
 
   useEffect(() => {
@@ -233,9 +240,12 @@ export default function ChatWindow({
         onScroll={handleScroll}
         style={{ flex: 1, overflowY: "auto", padding: 16 }}
       >
-        {entry?.messageList.map((message) => (
+        {/* Added optional chaining here so your app doesn't dramatically crash if messageList is temporarily undefined */}
+        {entry?.messageList?.map((message) => (
           <MessageBubble key={message.messageId} message={message} />
         ))}
+        {/* The invisible target at the bottom we scroll towards */}
+        <div ref={messagesEndRef} />
       </div>
       <MessageInput
         onSend={(text) =>
