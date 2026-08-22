@@ -12,6 +12,8 @@ import { ConversationProvider } from "../contexts/ConversationContext.tsx";
 import { screen } from "../utils/scope.ts";
 import About from "./pages/about-page/About.tsx";
 
+import { ToastProvider } from "../contexts/ToastProvider.tsx";
+
 function App() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
@@ -26,30 +28,34 @@ function App() {
   return (
     <ConversationProvider>
       <SocketProvider>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: isMobile ? "column" : "row",
-            height: "100dvh",
-            overflow: "hidden",
-          }}
-        >
-          {isMobile ? <MobileHeader /> : <AppHeader />}
+        <ToastProvider>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: isMobile ? "column" : "row",
+              height: "100dvh",
+              overflow: "hidden",
+            }}
+          >
+            {isMobile ? <MobileHeader /> : <AppHeader />}
 
-          {/* Main chat area */}
-          <main style={{ flex: 1, overflowY: "hidden", position: "relative" }}>
-            {" "}
-            <Routes>
-              <Route path="/auth" element={<Auth />} />
-              <Route element={<ProtectedRoute />}>
-                <Route path="/" element={<Chat />} />
-              </Route>
-              <Route path="/about" element={<About />} />
-            </Routes>
-          </main>
+            {/* Main chat area */}
+            <main
+              style={{ flex: 1, overflowY: "hidden", position: "relative" }}
+            >
+              {" "}
+              <Routes>
+                <Route path="/auth" element={<Auth />} />
+                <Route element={<ProtectedRoute />}>
+                  <Route path="/" element={<Chat />} />
+                </Route>
+                <Route path="/about" element={<About />} />
+              </Routes>
+            </main>
 
-          {isMobile && <MobileTabs />}
-        </div>
+            {isMobile && <MobileTabs />}
+          </div>
+        </ToastProvider>
       </SocketProvider>
     </ConversationProvider>
   );

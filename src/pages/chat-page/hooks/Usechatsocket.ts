@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useRef } from "react";
 import { useSocket } from "../../../../contexts/SocketProvider";
 import {
   useMessages,
@@ -8,6 +8,8 @@ import { useAuth } from "../../../../contexts/AuthProvider";
 import { sendFileMessageApi } from "../../../api/globalApiFetch";
 import { useConversation } from "../../../../contexts/ConversationContext";
 import applogo from "../../../assets/applogo.png";
+import { useToast } from "../../../../contexts/ToastProvider";
+import { usePseudoConnection } from "../../../../contexts/PseudoConnectionContext";
 
 export function useChatSocket() {
   const socket = useSocket();
@@ -20,13 +22,21 @@ export function useChatSocket() {
     deleteMessage,
   } = useMessages();
 
+  const { showToast } = useToast();
   const { selectedConversationId } = useConversation();
+  const selectedConversationIdRef = useRef(selectedConversationId);
+
+  const { getCachedUser, fetchUser } = usePseudoConnection();
+
+  useEffect(() => {
+    selectedConversationIdRef.current = selectedConversationId;
+  }, [selectedConversationId]);
 
   useEffect(() => {
     if (!socket || !user) return;
     const currentUserId = (user as any).id ?? (user as any)._id;
 
-    const handleNewMessage = (payload: any) => {
+    const handleNewMessage = async (payload: any) => {
       // payload: { _id, text, from, type, url, createdAt }
 
       if (String(payload.from) === String(currentUserId)) return;
@@ -43,7 +53,11 @@ export function useChatSocket() {
         },
         "dm",
       );
-      if (selectedConversationId != String(payload.from)) {
+      if (selectedConversationIdRef.current != String(payload.from)) {
+        let senderDetails = getCachedUser(payload.from);
+        if (!senderDetails) {
+          senderDetails = (await fetchUser(payload.from)) ?? undefined;
+        }
         if (document.hidden) {
           let isFlashing = false;
           const originalTitle = document.title;
@@ -66,6 +80,13 @@ export function useChatSocket() {
 
           document.addEventListener("visibilitychange", onVisibilityChange);
         } else {
+          showToast({
+            type: "info",
+            isMessage: true,
+            senderName: senderDetails?.fullname,
+            message:
+              payload.type === "text" ? payload.text : "Sent you a file 📁",
+          });
           if ("Notification" in window) {
             const title = "New Message!";
             const options = {
@@ -117,6 +138,7 @@ export function useChatSocket() {
     };
 
     const handleAlert = (msg: string) => {
+      showToast({ type: "alert", message: msg });
       console.warn("socket alert:", msg);
     };
 

@@ -39,6 +39,11 @@ export default function Chat() {
 
   const { setCanShowAppHeader } = useUIContext();
 
+  /* temp use effect */
+  useEffect(() => {
+    console.log(`selected conversation id from chat ${selectedConversationId}`);
+  }, [selectedConversationId]);
+
   useEffect(() => {
     setCanShowAppHeader(true);
   }, []);

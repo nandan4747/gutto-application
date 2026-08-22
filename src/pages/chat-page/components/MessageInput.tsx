@@ -51,7 +51,9 @@ export default function MessageInput({ onSend, onSendFile }: Props) {
 
     if (previewUrl) URL.revokeObjectURL(previewUrl);
     setAttachedFile(file);
-    setPreviewUrl(file.type.startsWith("image/") ? URL.createObjectURL(file) : null);
+    setPreviewUrl(
+      file.type.startsWith("image/") ? URL.createObjectURL(file) : null,
+    );
   };
 
   const handleSend = () => {
@@ -207,20 +209,20 @@ export default function MessageInput({ onSend, onSendFile }: Props) {
         <button
           style={{
             marginLeft: 8,
-            padding: "0px 26px",
-            background: colorScheme.primary,
-            color: colorScheme.text,
+            padding: "10px 12px",
+            background: colorScheme.backgroundTertiary,
+
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             border: "none",
-            borderRadius: 16,
+            borderRadius: "50%",
             cursor: "pointer",
           }}
           onClick={handleSend}
           disabled={!attachedFile && !text.trim()}
         >
-          <Send />
+          <Send fill={colorScheme.primary} stroke={colorScheme.primary} />
         </button>
       </div>
     </div>

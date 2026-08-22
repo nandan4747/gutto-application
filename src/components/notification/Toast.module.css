@@ -1,0 +1,76 @@
+.toastStack {
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  /* The stack itself shouldn't block clicks on whatever's underneath —
+     individual toasts re-enable pointer events for themselves. */
+  pointer-events: none;
+}
+
+.toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: min(90vw, 420px);
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: #1c1c1e;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  user-select: none;
+}
+
+.message {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.childrenSlot {
+  display: flex;
+  align-items: center;
+  margin-left: 4px;
+  cursor: default;
+}
+
+.entering {
+  /* Slight overshoot on entry — the little "spring" bounce is what
+     gives this the Dynamic Island feel rather than a flat slide-in. */
+  animation: toastIn 220ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.leaving {
+  animation: toastOut 200ms ease-in both;
+}
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateY(-16px) scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes toastOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.9);
+  }
+}
