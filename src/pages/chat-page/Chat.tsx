@@ -19,6 +19,8 @@ import GroupInfoPanel from "../group-chat/GroupInfoPanel";
 import ProfileSettingsPanel from "../profile-page/ProfileSettingsPanel";
 import { useUIContext } from "../../../contexts/UIContextProvider";
 import { HashLoader } from "react-spinners";
+import { API_DETAILS } from "../../api/API_DETAILS";
+import { apiFetch } from "../../../utils/apiFetch";
 
 export default function Chat() {
   const navigate = useNavigate();
@@ -33,16 +35,22 @@ export default function Chat() {
     setSelectedUserProfile,
     showGroupInfo,
     setShowGroupInfo,
+    blockedUsers,
+    setBlockedUsers,
   } = useConversation();
 
   const [initialLoading, setInitialLoading] = useState(true);
 
   const { setCanShowAppHeader } = useUIContext();
 
-  /* temp use effect */
   useEffect(() => {
-    console.log(`selected conversation id from chat ${selectedConversationId}`);
-  }, [selectedConversationId]);
+    if (blockedUsers.length === 0) {
+      apiFetch(`${API_DETAILS.host}/user/blocked`)
+        .then((res) => (res.ok ? res.json() : []))
+        .then((data) => setBlockedUsers(data))
+        .catch(() => {});
+    }
+  }, []);
 
   useEffect(() => {
     setCanShowAppHeader(true);

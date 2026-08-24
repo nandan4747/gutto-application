@@ -6,10 +6,15 @@ import { BookUser, Users, MessageCircle, Info } from "lucide-react";
 import { useNavigationView } from "../../../contexts/Navigationprovider";
 import { useUIContext } from "../../../contexts/UIContextProvider";
 import { useNavigate } from "react-router-dom";
+import { Avatar } from "../avatart_genrator/Avatar";
+import { useAuth } from "../../../contexts/AuthProvider";
 
 const AppHeader: React.FC = () => {
   const { activeView, setActiveView } = useNavigationView();
   const { canShowDesktopHeader } = useUIContext();
+  const { user } = useAuth();
+
+  const currentUser = (user as any)?.fullname || "Un-known";
   const navItemStyle = (view: typeof activeView) => ({
     background: activeView === view ? colorScheme.selected : "transparent",
     cursor: "pointer",
@@ -94,20 +99,7 @@ const AppHeader: React.FC = () => {
             outline: activeView === "profile" ? "2px solid #0a84ff" : "none",
           }}
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="white"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <circle cx="12" cy="8" r="5" />
-            <path d="M20 21a8 8 0 0 0-16 0" />
-          </svg>
+          <Avatar name={currentUser} size={48} />
         </div>
       </div>
     </div>
