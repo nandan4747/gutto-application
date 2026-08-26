@@ -238,7 +238,12 @@ export default function ChatWindow({
       <div
         ref={scrollContainerRef}
         onScroll={handleScroll}
-        style={{ flex: 1, overflowY: "auto", padding: 16 }}
+        style={{
+          flex: 1,
+          overflowY: "auto",
+          padding: 16,
+          background: colorScheme.backgroundGradient,
+        }}
       >
         {/* Added optional chaining here so your app doesn't dramatically crash if messageList is temporarily undefined */}
         {entry?.messageList?.map((message) => (

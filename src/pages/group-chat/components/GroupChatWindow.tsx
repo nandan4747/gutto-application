@@ -196,7 +196,12 @@ export default function GroupChatWindow({
       <div
         ref={scrollContainerRef}
         onScroll={handleScroll}
-        style={{ flex: 1, overflowY: "auto", padding: 16 }}
+        style={{
+          flex: 1,
+          overflowY: "auto",
+          padding: 16,
+          background: colorScheme.backgroundGradient,
+        }}
       >
         {entry?.messageList.map((message) => (
           <GroupChatBubble key={message.messageId} message={message} />

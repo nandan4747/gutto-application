@@ -100,9 +100,15 @@
   height: 56px;
   box-sizing: border-box;
   flex-shrink: 0;
-  background-color: #121212;
+
   border-top: 1px solid #2a2a2a;
   padding-bottom: env(safe-area-inset-bottom);
+  border-radius: 16px;
+
+  min-width: 90vw;
+  margin-bottom: 10px;
+
+  align-self: center;
 }
 
 .tabButton {

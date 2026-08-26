@@ -77,7 +77,7 @@ export default function MessageBubble({ message }: Props) {
           position: "relative",
           maxWidth: "60%",
           padding: "8px 12px",
-          borderRadius: 12,
+          borderRadius: isOwn ? "16px 0px 16px 16px" : "0px 16px 16px 12px",
           background: isDeleted
             ? colorScheme.backgroundSecondary
             : isOwn

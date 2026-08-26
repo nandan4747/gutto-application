@@ -5,6 +5,7 @@ import styles from "./MobileLayout.module.css";
 import { useUIContext } from "../../../contexts/UIContextProvider";
 import { Avatar } from "../avatart_genrator/Avatar";
 import { useAuth } from "../../../contexts/AuthProvider";
+import { colorScheme } from "../../theme/colorScheme";
 
 const TABS = [
   { id: "chats", label: "Chats", Icon: MessageCircle, needAvatar: false },
@@ -15,16 +16,19 @@ const TABS = [
 
 const MobileTabs: React.FC = () => {
   const { activeView, setActiveView } = useNavigationView();
-  const { canShowDesktopHeader } = useUIContext();
+  const { canShowDesktopHeader, canShowTabs } = useUIContext();
   const { user } = useAuth();
   const currentUser = (user as any)?.fullname || "Un-known";
 
-  if (!canShowDesktopHeader) {
+  if (!canShowDesktopHeader || !canShowTabs) {
     return null;
   }
 
   return (
-    <nav className={styles.mobileTabs}>
+    <nav
+      style={{ background: colorScheme.backgroundGradient }}
+      className={styles.mobileTabs}
+    >
       {TABS.map(({ id, label, Icon, needAvatar }) => {
         const isActive = activeView === id;
         return (

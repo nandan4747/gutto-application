@@ -131,7 +131,10 @@ export default function ProfileSettingsPanel() {
   };
 
   return (
-    <div className={styles.container}>
+    <div
+      style={{ background: colorScheme.backgroundGradient }}
+      className={styles.container}
+    >
       <div className={styles.profileSection}>
         <Avatar name={fullname || username} size={88} />
         <div

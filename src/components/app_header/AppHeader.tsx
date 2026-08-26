@@ -99,7 +99,7 @@ const AppHeader: React.FC = () => {
             outline: activeView === "profile" ? "2px solid #0a84ff" : "none",
           }}
         >
-          <Avatar name={currentUser} size={48} />
+          <Avatar name={currentUser} size={38} />
         </div>
       </div>
     </div>

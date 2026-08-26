@@ -41,7 +41,8 @@ export default function Chat() {
 
   const [initialLoading, setInitialLoading] = useState(true);
 
-  const { setCanShowAppHeader } = useUIContext();
+  const { setCanShowAppHeader, setCanShowTabs, setCanShowDesktopHeader } =
+    useUIContext();
 
   useEffect(() => {
     if (blockedUsers.length === 0) {
@@ -53,7 +54,9 @@ export default function Chat() {
   }, []);
 
   useEffect(() => {
+    setCanShowTabs(true);
     setCanShowAppHeader(true);
+    setCanShowDesktopHeader(true);
   }, []);
 
   useEffect(() => {

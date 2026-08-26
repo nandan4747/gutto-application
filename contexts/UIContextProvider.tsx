@@ -5,6 +5,8 @@ type UIContextType = {
   setCanShowAppHeader: (show: boolean) => void;
   canShowDesktopHeader: boolean;
   setCanShowDesktopHeader: (show: boolean) => void;
+  canShowTabs: boolean;
+  setCanShowTabs: (show: boolean) => void;
 };
 
 export const UIContext = createContext<UIContextType | undefined>(undefined);
@@ -16,6 +18,7 @@ export const UIContextProvider = ({
 }) => {
   const [canShowAppHeader, setCanShowAppHeader] = useState(false);
   const [canShowDesktopHeader, setCanShowDesktopHeader] = useState(true);
+  const [canShowTabs, setCanShowTabs] = useState(true);
 
   return (
     <UIContext.Provider
@@ -24,6 +27,8 @@ export const UIContextProvider = ({
         setCanShowAppHeader,
         canShowDesktopHeader,
         setCanShowDesktopHeader,
+        canShowTabs,
+        setCanShowTabs,
       }}
     >
       {children}
