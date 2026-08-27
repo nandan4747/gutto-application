@@ -6,7 +6,6 @@ import { colorScheme } from "../../theme/colorScheme";
 import { updateFullname, changePassword, toggleAccountType } from "./Api";
 import styles from "./ProfileSettingsPanel.module.css";
 import { clearStoredToken } from "../../../utils/AuthToken";
-import { ThemeToggleButton } from "../../components/toggle_btn/ThemeToggleButton";
 
 export default function ProfileSettingsPanel() {
   const { user, setUser } = useAuth();
