@@ -41,7 +41,7 @@ export default function MessageContent({ message, isDeleted }: Props) {
             }}
           />
         </a>
-        {message.text && <div style={{ marginTop: 6 }}>{message.text}</div>}
+        {message.text && <div style={{ marginTop: 6 }}> {message.text}</div>}
       </div>
     );
   }

@@ -20,3 +20,49 @@
 body {
   background-color: #121212;
 }
+
+/* Default Dark Mode */
+:root {
+  --primary: #1e8eff;
+  --secondary: #00eeff;
+  --bg-gradient: radial-gradient(
+    ellipse at top,
+    #0b1329 0%,
+    #080a0f 60%,
+    #030406 100%
+  );
+  --bg: #121212;
+  --bg-secondary: #1e1e1e;
+  --bg-tertiary: #2a2a2a;
+  --surface: #1e1e1e;
+  --selected: #2d2d2d;
+  --text: #ffffff;
+  --text-secondary: #aaaaaa;
+  --border: #2a2a2a;
+  --glass: #0303032b;
+  --glass-border: #ffffff53;
+  --glass-selected: #ffffff3f;
+}
+
+/* Light Mode Override */
+[data-theme="light"] {
+  --primary: #1e8eff;
+  --secondary: #00b8c4;
+  --bg-gradient: radial-gradient(
+    ellipse at top,
+    #e8f0fe 0%,
+    #f8f9fa 60%,
+    #ffffff 100%
+  );
+  --bg: #ffffff;
+  --bg-secondary: #e3e5e7;
+  --bg-tertiary: #ced0d5;
+  --surface: #ffffff;
+  --selected: #e4e6eb;
+  --text: #050505;
+  --text-secondary: #65676b;
+  --border: #cccccc;
+  --glass: #ffffff80;
+  --glass-border: #00000020;
+  --glass-selected: #00000010;
+}

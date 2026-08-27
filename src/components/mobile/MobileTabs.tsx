@@ -26,7 +26,11 @@ const MobileTabs: React.FC = () => {
 
   return (
     <nav
-      style={{ background: colorScheme.backgroundGradient }}
+      style={{
+        background: colorScheme.background,
+        color: colorScheme.text,
+        borderColor: colorScheme.border,
+      }}
       className={styles.mobileTabs}
     >
       {TABS.map(({ id, label, Icon, needAvatar }) => {

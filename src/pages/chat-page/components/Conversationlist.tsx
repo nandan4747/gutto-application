@@ -32,7 +32,6 @@ export default function ConversationList({
     <div
       style={{
         width: "100%",
-        borderRight: `1px solid ${colorScheme.border}`,
         overflowY: "auto",
       }}
     >

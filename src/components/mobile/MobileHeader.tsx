@@ -6,6 +6,7 @@ import styles from "./MobileLayout.module.css";
 import { Info } from "lucide-react";
 import { colorScheme } from "../../theme/colorScheme";
 import { useNavigate } from "react-router-dom";
+import { ThemeToggleButton } from "../toggle_btn/ThemeToggleButton";
 
 const MobileHeader: React.FC = () => {
   const { canShowAppHeader, setCanShowAppHeader } = useUIContext();
@@ -17,13 +18,23 @@ const MobileHeader: React.FC = () => {
   if (!canShowAppHeader) return null;
 
   return (
-    <header className={styles.mobileHeader}>
+    <header
+      className={styles.mobileHeader}
+      style={{
+        color: colorScheme.text,
+        background: colorScheme.background,
+        borderColor: colorScheme.border,
+      }}
+    >
       <div className={styles.brand}>
         <img src={AppLogo} alt="EN SAMACHARA Logo" className={styles.logo} />
-        <h1 className={styles.brandTitle}>EN SAMACHARA</h1>
+        <h1 className={styles.brandTitle} style={{ color: colorScheme.text }}>
+          EN SAMACHARA
+        </h1>
         <span className={styles.separator}>/</span>
         <span className={styles.viewBreadcrumb}>{viewTitle}</span>
       </div>
+
       <div
         onClick={() => {
           nav("/about");
@@ -32,6 +43,8 @@ const MobileHeader: React.FC = () => {
       >
         <Info style={{ color: colorScheme.text }} size={15}></Info>
       </div>
+
+      <ThemeToggleButton />
     </header>
   );
 };

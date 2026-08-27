@@ -8,6 +8,7 @@ import { useUIContext } from "../../../contexts/UIContextProvider";
 import { useNavigate } from "react-router-dom";
 import { Avatar } from "../avatart_genrator/Avatar";
 import { useAuth } from "../../../contexts/AuthProvider";
+import { ThemeToggleButton } from "../toggle_btn/ThemeToggleButton";
 
 const AppHeader: React.FC = () => {
   const { activeView, setActiveView } = useNavigationView();
@@ -35,7 +36,9 @@ const AppHeader: React.FC = () => {
     >
       <div className={styles.brandContainer}>
         <img src={AppLogo} alt="EN SAMACHARA Logo" className={styles.logo} />
-        <h1 className={styles.appName}>EN SAMACHARA</h1>
+        <h1 className={styles.appName} style={{ color: colorScheme.text }}>
+          EN SAMACHARA
+        </h1>
       </div>
 
       <div
@@ -43,7 +46,14 @@ const AppHeader: React.FC = () => {
         style={navItemStyle("chats")}
         onClick={() => setActiveView("chats")}
       >
-        <MessageCircle className={styles.navOptions} size={24} />
+        <MessageCircle
+          className={styles.navOptions}
+          style={{
+            background: colorScheme.backgroundTertiary,
+            color: colorScheme.text,
+          }}
+          size={24}
+        />
         <p
           className={styles.nav_label}
           style={{ color: colorScheme.textSecondary }}
@@ -57,7 +67,14 @@ const AppHeader: React.FC = () => {
         style={navItemStyle("friends")}
         onClick={() => setActiveView("friends")}
       >
-        <BookUser className={styles.navOptions} size={24} />
+        <BookUser
+          className={styles.navOptions}
+          style={{
+            background: colorScheme.backgroundTertiary,
+            color: colorScheme.text,
+          }}
+          size={24}
+        />
         <p
           className={styles.nav_label}
           style={{ color: colorScheme.textSecondary }}
@@ -71,7 +88,14 @@ const AppHeader: React.FC = () => {
         style={navItemStyle("groups")}
         onClick={() => setActiveView("groups")}
       >
-        <Users className={styles.navOptions} size={24} />
+        <Users
+          className={styles.navOptions}
+          style={{
+            background: colorScheme.backgroundTertiary,
+            color: colorScheme.text,
+          }}
+          size={24}
+        />
         <p
           className={styles.nav_label}
           style={{ color: colorScheme.textSecondary }}
@@ -81,13 +105,24 @@ const AppHeader: React.FC = () => {
       </div>
 
       <div className={styles.navActions} onClick={() => nav("/about")}>
-        <Info className={styles.navOptions} size={24} />
+        <Info
+          className={styles.navOptions}
+          style={{
+            background: colorScheme.backgroundTertiary,
+            color: colorScheme.text,
+          }}
+          size={24}
+        />
         <p
           className={styles.nav_label}
           style={{ color: colorScheme.textSecondary }}
         >
           About
         </p>
+      </div>
+
+      <div className={styles.navActions}>
+        <ThemeToggleButton />
       </div>
 
       <div className={styles.actions}>
