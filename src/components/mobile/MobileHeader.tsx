@@ -7,6 +7,7 @@ import { Info } from "lucide-react";
 import { colorScheme } from "../../theme/colorScheme";
 import { useNavigate } from "react-router-dom";
 import { ThemeToggleButton } from "../toggle_btn/ThemeToggleButton";
+import voiceLogo from "../../assets/logo_voice_.png";
 
 const MobileHeader: React.FC = () => {
   const { canShowAppHeader, setCanShowAppHeader } = useUIContext();
@@ -42,6 +43,19 @@ const MobileHeader: React.FC = () => {
         }}
       >
         <Info style={{ color: colorScheme.text }} size={15}></Info>
+      </div>
+      <div>
+        <a
+          href="https://voice-music.vercel.app"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <img
+            style={{ width: 40, height: 40 }}
+            src={voiceLogo}
+            alt="voice music"
+          />
+        </a>
       </div>
 
       <ThemeToggleButton />

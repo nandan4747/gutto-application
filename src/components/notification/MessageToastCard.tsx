@@ -1,14 +1,24 @@
+import { useConversation } from "../../../contexts/ConversationContext";
+import { useNavigationView } from "../../../contexts/Navigationprovider";
+import { useToast } from "../../../contexts/ToastProvider";
 import { Avatar } from "../avatart_genrator/Avatar";
 
 interface MessageToastCardProps {
   senderName: string;
   messageText: string;
+  senderId?: string; // Optional sender ID for future use
+  toastId?: string; // Optional toast ID for future use
 }
 
 export default function MessageToastCard({
   senderName,
   messageText,
+  senderId,
+  toastId,
 }: MessageToastCardProps) {
+  const { setSelectedConversationId } = useConversation(); // Placeholder for future use of senderId if needed
+  const { setActiveView } = useNavigationView();
+  const { dismissToast } = useToast(); // Placeholder for future use of toastId if needed
   return (
     <div
       style={{
@@ -19,7 +29,15 @@ export default function MessageToastCard({
         maxWidth: "280px", // Keeps the toast from turning into a billboard
       }}
     >
-      <Avatar name={senderName} size={36} />
+      <Avatar
+        onClick={() => {
+          setActiveView("chats");
+          setSelectedConversationId(senderId!);
+          dismissToast(toastId!); // Dismiss the toast when navigating to the chat
+        }}
+        name={senderName}
+        size={36}
+      />
 
       <div
         style={{

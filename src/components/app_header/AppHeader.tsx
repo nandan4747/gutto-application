@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { Avatar } from "../avatart_genrator/Avatar";
 import { useAuth } from "../../../contexts/AuthProvider";
 import { ThemeToggleButton } from "../toggle_btn/ThemeToggleButton";
+import voiceLogo from "../../assets/logo_voice_.png";
 
 const AppHeader: React.FC = () => {
   const { activeView, setActiveView } = useNavigationView();
@@ -123,6 +124,32 @@ const AppHeader: React.FC = () => {
 
       <div className={styles.navActions}>
         <ThemeToggleButton />
+        <p
+          className={styles.nav_label}
+          style={{ color: colorScheme.textSecondary }}
+        >
+          Theme
+        </p>
+      </div>
+
+      <div className={styles.navActions}>
+        <a
+          href="https://voice-music.vercel.app"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <img
+            style={{ width: 40, height: 40 }}
+            src={voiceLogo}
+            alt="voice music"
+          />
+        </a>
+        <p
+          className={styles.nav_label}
+          style={{ color: colorScheme.textSecondary }}
+        >
+          Voice Music
+        </p>
       </div>
 
       <div className={styles.actions}>

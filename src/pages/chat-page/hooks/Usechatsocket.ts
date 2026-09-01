@@ -86,6 +86,7 @@ export function useChatSocket() {
             senderName: senderDetails?.fullname,
             message:
               payload.type === "text" ? payload.text : "Sent you a file 📁",
+            senderId: payload.from,
           });
           if ("Notification" in window) {
             const title = "New Message!";

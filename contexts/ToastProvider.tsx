@@ -20,6 +20,7 @@ interface ToastItem {
   leaving?: boolean;
   isMessage?: boolean; // <-- NEW FLAG
   senderName?: string; // <-- NEW DATA
+  senderId?: string; // <-- NEW DATA
 }
 
 interface ShowToastOptions {
@@ -29,6 +30,7 @@ interface ShowToastOptions {
   duration?: number;
   isMessage?: boolean; // <-- NEW FLAG
   senderName?: string; // <-- NEW DATA
+  senderId?: string; // <-- NEW DATA
 }
 
 interface ToastContextValue {
@@ -72,11 +74,21 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       duration = 3500,
       isMessage = false, // Default to false
       senderName,
+      senderId,
     }: ShowToastOptions) => {
       const id = crypto.randomUUID();
       setToasts((prev) => [
         ...prev,
-        { id, type, message, children, duration, isMessage, senderName },
+        {
+          id,
+          type,
+          message,
+          children,
+          duration,
+          isMessage,
+          senderName,
+          senderId,
+        },
       ]);
 
       if (duration > 0) {
@@ -121,6 +133,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               <MessageToastCard
                 senderName={toast.senderName ?? "Mysterious Stranger"}
                 messageText={toast.message}
+                senderId={toast.senderId}
+                toastId={toast.id}
               />
             ) : (
               toast.children
