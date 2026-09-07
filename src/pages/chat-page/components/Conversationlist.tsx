@@ -32,7 +32,11 @@ export default function ConversationList({
     <div
       style={{
         width: "100%",
+        height: "100%",
         overflowY: "auto",
+        WebkitOverflowScrolling: "touch",
+        overscrollBehaviorY: "contain",
+        paddingBottom: "16px",
       }}
     >
       {isLoading && conversations.length === 0 && <ConversationSkeleton />}
@@ -40,7 +44,7 @@ export default function ConversationList({
       {!isLoading && conversations.length === 0 && (
         <div
           style={{
-            height: "100vh",
+            height: "100%",
             width: "100%",
             color: colorScheme.textSecondary,
             display: "flex",

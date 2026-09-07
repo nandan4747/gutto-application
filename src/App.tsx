@@ -41,7 +41,12 @@ function App() {
 
             {/* Main chat area */}
             <main
-              style={{ flex: 1, overflowY: "hidden", position: "relative" }}
+              style={{
+                flex: 1,
+                minHeight: 0,
+                overflowY: "hidden",
+                position: "relative",
+              }}
             >
               {" "}
               <Routes>

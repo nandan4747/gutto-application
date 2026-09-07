@@ -8,7 +8,6 @@ import {
 } from "react";
 import Toast, { type ToastType } from "../src/components/notification/Toast";
 import styles from "../src/components/notification/Toast.module.css";
-// IMPORT YOUR SHINY NEW CARD HERE
 import MessageToastCard from "../src/components/notification/MessageToastCard";
 
 interface ToastItem {
