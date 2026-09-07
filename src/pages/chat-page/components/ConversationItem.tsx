@@ -73,7 +73,7 @@ export default function ConversationItem({
         padding: "12px 16px",
         cursor: "pointer",
         background: isSelected ? colorScheme.selected : "transparent",
-        flexShrink: 0,
+
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
