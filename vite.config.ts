@@ -7,38 +7,27 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: [
-        "favicon.ico",
-        "apple-touch-icon.png",
-        "pwa-192x192.png",
-        "pwa-512x512.png",
-      ],
+      devOptions: {
+        enabled: true,
+        suppressWarnings: true,
+      },
+      includeAssets: ["applogo.png"],
       manifest: {
         name: "En samachara",
         short_name: "Samachara",
         description: "En samachara mobile application",
-        theme_color: "#121212", // Set to match your default dark mode background
+        theme_color: "#121212",
         background_color: "#121212",
-        display: "standalone", // Hides browser UI (address bar) to look like a native app
+        display: "standalone",
         orientation: "portrait",
         scope: "/",
         start_url: "/",
         icons: [
           {
-            src: "/pwa-192x192.png",
-            sizes: "192x192",
+            src: "/applogo.png",
+            sizes: "192x192 512x512",
             type: "image/png",
-          },
-          {
-            src: "/pwa-512x512.png",
-            sizes: "512x512",
-            type: "image/png",
-          },
-          {
-            src: "/pwa-512x512.png",
-            sizes: "512x512",
-            type: "image/png",
-            purpose: "any maskable", // Ensures full screen icon formatting on Android
+            purpose: "any maskable",
           },
         ],
       },
