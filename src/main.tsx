@@ -9,6 +9,9 @@ import { NavigationProvider } from "../contexts/Navigationprovider.tsx";
 import { PseudoConnectionProvider } from "../contexts/PseudoConnectionContext.tsx";
 import { ConnectedPeopleProvider } from "../contexts/RelationProvider.tsx";
 import { UIContextProvider } from "../contexts/UIContextProvider.tsx";
+import { registerSW } from "virtual:pwa-register";
+
+registerSW({ immediate: true });
 
 createRoot(document.getElementById("root")!).render(
   <AuthProvider>
