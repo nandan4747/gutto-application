@@ -53,6 +53,7 @@ export default function ConversationList({
             backgroundSize: "cover",
             backgroundRepeat: "no-repeat",
             backgroundPosition: "bottom",
+            maxHeight: "100%",
           }}
         >
           <TypewriterText
