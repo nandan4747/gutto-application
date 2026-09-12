@@ -2,6 +2,7 @@ import "./App.css";
 import { Routes, Route } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Auth from "./pages/auth-pages/Auth";
+import { SocketProvider } from "../contexts/SocketProvider.tsx";
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
 import Chat from "./pages/chat-page/Chat.tsx";
 import AppHeader from "./components/app_header/AppHeader.tsx";
@@ -26,39 +27,36 @@ function App() {
 
   return (
     <ConversationProvider>
-      <ToastProvider>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: isMobile ? "column" : "row",
-            height: "100dvh",
-            overflow: "hidden",
-          }}
-        >
-          {isMobile ? <MobileHeader /> : <AppHeader />}
-
-          {/* Main chat area */}
-          <main
+      <SocketProvider>
+        <ToastProvider>
+          <div
             style={{
-              flex: 1,
               display: "flex",
-              flexDirection: "column",
-              minHeight: 0,
-              position: "relative",
+              flexDirection: isMobile ? "column" : "row",
+              height: "100dvh",
+              overflow: "hidden",
             }}
           >
-            <Routes>
-              <Route path="/auth" element={<Auth />} />
-              <Route element={<ProtectedRoute />}>
-                <Route path="/" element={<Chat />} />
-              </Route>
-              <Route path="/about" element={<About />} />
-            </Routes>
-          </main>
+            {isMobile ? <MobileHeader /> : <AppHeader />}
 
-          {isMobile && <MobileTabs />}
-        </div>
-      </ToastProvider>
+            {/* Main chat area */}
+            <main
+              style={{ flex: 1, overflowY: "hidden", position: "relative" }}
+            >
+              {" "}
+              <Routes>
+                <Route path="/auth" element={<Auth />} />
+                <Route element={<ProtectedRoute />}>
+                  <Route path="/" element={<Chat />} />
+                </Route>
+                <Route path="/about" element={<About />} />
+              </Routes>
+            </main>
+
+            {isMobile && <MobileTabs />}
+          </div>
+        </ToastProvider>
+      </SocketProvider>
     </ConversationProvider>
   );
 }
