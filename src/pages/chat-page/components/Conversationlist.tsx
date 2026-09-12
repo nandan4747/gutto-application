@@ -34,6 +34,7 @@ export default function ConversationList({
         display: "flex",
         flexDirection: "column",
         overflowY: "auto",
+        boxSizing: "border-box",
         WebkitOverflowScrolling: "touch",
       }}
     >

@@ -22,7 +22,8 @@
   background-repeat: no-repeat;
   background-position: center;
   isolation: isolate;
-  max-height: 100vh;
+  max-height: 100%;
+  box-sizing: border-box;
 }
 .authCard {
   width: min(460px, 100%);
