@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { colorScheme } from "../../theme/colorScheme";
 
 interface TypewriterTextProps {
   text: string;
