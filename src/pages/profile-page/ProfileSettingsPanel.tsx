@@ -6,6 +6,7 @@ import { colorScheme } from "../../theme/colorScheme";
 import { updateFullname, changePassword, toggleAccountType } from "./Api";
 import styles from "./ProfileSettingsPanel.module.css";
 import { clearStoredToken } from "../../../utils/AuthToken";
+import { useToast } from "../../../contexts/ToastProvider";
 
 export default function ProfileSettingsPanel() {
   const { user, setUser } = useAuth();
@@ -14,6 +15,7 @@ export default function ProfileSettingsPanel() {
   const username = (user as any)?.username ?? "";
   const fullname = (user as any)?.fullname ?? "";
   const accountType = (user as any)?.accountType ?? "private";
+  const { showToast } = useToast();
 
   // ---- Fullname editing ----
   const [isEditingName, setIsEditingName] = useState(false);
@@ -89,14 +91,26 @@ export default function ProfileSettingsPanel() {
     setPasswordSuccess(false);
 
     if (!oldPassword || !newPassword || !confirmPassword) {
+      showToast({
+        type: "alert",
+        message: "Fill in all three fields.",
+      });
       setPasswordError("Fill in all three fields.");
       return;
     }
     if (newPassword !== confirmPassword) {
+      showToast({
+        type: "alert",
+        message: "New passwords don't match.",
+      });
       setPasswordError("New passwords don't match.");
       return;
     }
     if (newPassword === oldPassword) {
+      showToast({
+        type: "alert",
+        message: "New password must be different from the current one.",
+      });
       setPasswordError("New password must be different from the current one.");
       return;
     }
@@ -109,6 +123,10 @@ export default function ProfileSettingsPanel() {
       setNewPassword("");
       setConfirmPassword("");
     } catch (err: any) {
+      showToast({
+        type: "error",
+        message: err.message,
+      });
       setPasswordError(err.message);
     } finally {
       setPasswordSubmitting(false);
@@ -361,7 +379,7 @@ export default function ProfileSettingsPanel() {
         </p>
         <button
           className={styles.submitButton}
-          style={{ background: "#ef4444" }}
+          style={{ background: "#ef4444", width: "100%" }}
           disabled={loggingOut}
           onClick={handleLogout}
         >

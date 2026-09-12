@@ -7,7 +7,9 @@ import { useNavigate } from "react-router-dom";
 import { colorScheme } from "../../theme/colorScheme";
 import { isUserAlreadyVisted } from "../../../utils/freshUser";
 import { useUIContext } from "../../../contexts/UIContextProvider";
-import AuroraBorealisBG from "../../components/background/AuroraBorealisBG";
+import TypewriterText from "../../components/animated/TypewriterText";
+import { useToast } from "../../../contexts/ToastProvider";
+
 export default function Auth() {
   const navigate = useNavigate();
   const [mode, setMode] = useState<"login" | "register">("login");
@@ -18,6 +20,7 @@ export default function Auth() {
   const [accountType, setAccountType] = useState<"private" | "public">(
     "private",
   );
+  const { showToast } = useToast();
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -50,12 +53,19 @@ export default function Auth() {
         const response = await login(loginData);
 
         if ((response as any).error) {
+          showToast({
+            type: "alert",
+            message: (response as any).error,
+          });
           setError((response as any).error);
         } else {
           // CHANGED: response is now { user, token } instead of just
           // the user object — pass both to setUser so the token gets
           // persisted.
-
+          showToast({
+            type: "success",
+            message: `Welcome back, ${response.user.username}!`,
+          });
           setMessage(`Welcome back, ${response.user.username}!`);
           setUser(response.user, response.token);
           navigate("/", { replace: true });
@@ -70,8 +80,16 @@ export default function Auth() {
         const response = await register(registerData);
 
         if ((response as any).error) {
+          showToast({
+            type: "alert",
+            message: (response as any).error,
+          });
           setError((response as any).error);
         } else {
+          showToast({
+            type: "success",
+            message: `Registered successfully as ${response.user.username}`,
+          });
           setMessage(`Registered successfully as ${response.user.username}.`);
           setUser(response.user, response.token);
           navigate("/", { replace: true });
@@ -87,7 +105,17 @@ export default function Auth() {
   };
 
   return (
-    <AuroraBorealisBG>
+    <div className={styles.bg}>
+      <div className={styles.typewriter}>
+        <TypewriterText
+          text="Let's break the silence"
+          style={{
+            color: "white",
+            fontSize: "xx-large",
+            textAlign: "center",
+          }}
+        />
+      </div>
       <div
         style={{
           color: colorScheme.text,
@@ -100,7 +128,7 @@ export default function Auth() {
               type="button"
               style={{
                 backgroundColor:
-                  mode === "login" ? colorScheme.glassSelected : "#0605050e",
+                  mode === "login" ? colorScheme.primary : "#0605050e",
                 color: mode === "login" ? colorScheme.text : colorScheme.text,
               }}
               className={mode === "login" ? styles.active : ""}
@@ -114,7 +142,7 @@ export default function Auth() {
             <button
               style={{
                 backgroundColor:
-                  mode === "register" ? colorScheme.glassSelected : "#0605050e",
+                  mode === "register" ? colorScheme.primary : "#0605050e",
                 color:
                   mode === "register" ? colorScheme.text : colorScheme.text,
               }}
@@ -196,7 +224,7 @@ export default function Auth() {
                     style={{
                       backgroundColor:
                         accountType === "private"
-                          ? colorScheme.glassSelected
+                          ? colorScheme.secondary
                           : "transparent",
                       color:
                         accountType === "private"
@@ -212,7 +240,7 @@ export default function Auth() {
                     style={{
                       backgroundColor:
                         accountType === "public"
-                          ? colorScheme.glassSelected
+                          ? colorScheme.secondary
                           : "transparent",
                       color:
                         accountType === "public"
@@ -243,8 +271,41 @@ export default function Auth() {
             {message && <p className={styles.successMessage}>{message}</p>}
             {error && <p className={styles.errorMessage}>{error}</p>}
           </form>
+          {mode === "login" && (
+            <div
+              style={{
+                display: "flex",
+                padding: "5px",
+                marginTop: "10px",
+              }}
+            >
+              <TypewriterText text="No account ?" />{" "}
+              <p
+                style={{
+                  marginLeft: "10px",
+                  cursor: "pointer",
+                  color: colorScheme.primary,
+                }}
+                onClick={() => {
+                  setMode("register");
+                }}
+              >
+                Register
+              </p>
+            </div>
+          )}
         </div>
       </div>
-    </AuroraBorealisBG>
+      <div>
+        <p
+          onClick={() => {
+            navigate("/about");
+          }}
+          style={{ color: "white", cursor: "pointer" }}
+        >
+          About
+        </p>
+      </div>
+    </div>
   );
 }

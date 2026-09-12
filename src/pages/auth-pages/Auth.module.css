@@ -1,13 +1,27 @@
 .authPage {
-  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: rgba(0, 8, 25, 0.374);
 
-  padding: 2rem;
+  min-width: 90%;
 }
 
+.typewriter {
+  width: 100%;
+  text-align: center;
+  margin-bottom: 2.5rem; /* Creates nice spacing above the auth card */
+}
+.bg {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
+  align-items: center;
+  background-image: url("../../assets/layered-steps-haikei.svg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+}
 .authCard {
   width: min(460px, 100%);
   background-color: rgba(7, 6, 6, 0.075);
@@ -157,4 +171,10 @@
   color: #7a1d13;
   background: #ffe9e7;
   border: 1px solid #f1c2be;
+}
+
+@media (max-width: 600px) {
+  .bg {
+    background-image: url("../../assets/layered-steps-haikei-vertical.svg");
+  }
 }

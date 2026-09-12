@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useAuth } from "../../../../contexts/AuthProvider";
 import type { StoredMessage } from "../../../../contexts/MessageProvider";
 import { colorScheme } from "../../../theme/colorScheme";
+import { MessageCircleX } from "lucide-react";
 import {
   deleteMessageApi,
   deleteFileMessageApi,
@@ -112,18 +113,21 @@ export default function MessageBubble({ message }: Props) {
             disabled={isDeleting}
             style={{
               marginTop: 6,
-              padding: "2px 8px",
-              fontSize: 11,
-              fontWeight: 600,
-              color: "#fff",
-              backgroundColor: "#e53e3e",
+              padding: "2px 4px",
+
+              backgroundColor: "transparent",
               border: "none",
               borderRadius: 6,
               cursor: "pointer",
               display: "block",
+              color: "white",
             }}
           >
-            {isDeleting ? "Deleting..." : "Delete"}
+            {isDeleting ? (
+              "Deleting..."
+            ) : (
+              <MessageCircleX fill="red" stroke="white" />
+            )}
           </button>
         )}
       </div>

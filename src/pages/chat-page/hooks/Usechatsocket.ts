@@ -7,7 +7,7 @@ import {
 import { useAuth } from "../../../../contexts/AuthProvider";
 import { sendFileMessageApi } from "../../../api/globalApiFetch";
 import { useConversation } from "../../../../contexts/ConversationContext";
-import applogo from "../../../assets/applogo.png";
+import applogo from "../../../assets/applogo.webp";
 import { useToast } from "../../../../contexts/ToastProvider";
 import { usePseudoConnection } from "../../../../contexts/PseudoConnectionContext";
 

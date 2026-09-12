@@ -23,8 +23,8 @@ body {
 
 /* Default Dark Mode */
 :root {
-  --primary: #1e8eff;
-  --secondary: #00eeff;
+  --primary: #9900ff;
+  --secondary: rgb(112, 1, 187);
   --bg-gradient: radial-gradient(
     ellipse at top,
     #0b1329 0%,

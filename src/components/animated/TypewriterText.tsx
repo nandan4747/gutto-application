@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { colorScheme } from "../../theme/colorScheme";
 
 interface TypewriterTextProps {
   text: string;
@@ -12,7 +13,7 @@ export default function TypewriterText({
   text,
   speed = 70,
   startDelay = 400,
-  cursorColor = "#3182ce",
+  cursorColor = "#fff",
   style,
 }: TypewriterTextProps) {
   const [displayedText, setDisplayedText] = useState("");
