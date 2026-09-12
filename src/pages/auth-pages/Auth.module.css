@@ -21,18 +21,27 @@
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
+  isolation: isolate;
 }
 .authCard {
   width: min(460px, 100%);
-  background-color: rgba(7, 6, 6, 0.075);
+  background-color: rgba(
+    7,
+    6,
+    6,
+    0.058
+  ); /* Bumped slightly so it's visible if background is dark */
   border-radius: 24px;
   padding: 2rem;
 
-  /* The glass magic */
+  /* Force WebKit vendor prefix FIRST, standard SECOND */
+  -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px); /* Safari support */
 
-  /* Glass edge highlight & shadow */
+  /* Force hardware acceleration on production GPU layers */
+  transform: translateZ(0);
+  will-change: backdrop-filter;
+
   border: 1px solid rgba(255, 255, 255, 0.12);
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
 }
