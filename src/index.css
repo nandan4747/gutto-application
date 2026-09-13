@@ -46,8 +46,8 @@ body {
 
 /* Light Mode Override */
 [data-theme="light"] {
-  --primary: #1e8eff;
-  --secondary: #00b8c4;
+  --primary: #9900ff;
+  --secondary: rgb(112, 1, 187);
   --bg-gradient: radial-gradient(
     ellipse at top,
     #e8f0fe 0%,
