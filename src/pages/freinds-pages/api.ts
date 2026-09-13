@@ -103,3 +103,13 @@ export const getBlockedUsers = async () => {
   const res = await apiFetch(`${BASE}/blocked`);
   return handle(res);
 };
+
+//to check wheather this user is freind or not
+export const checkConnectionStatus = async (
+  targetUserId: string,
+): Promise<{ connected: boolean }> => {
+  const res = await apiFetch(`${BASE}/connection/${targetUserId}`, {
+    method: "GET",
+  });
+  return handle(res);
+};

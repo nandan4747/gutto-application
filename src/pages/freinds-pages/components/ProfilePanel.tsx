@@ -1,7 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useConversation } from "../../../../contexts/ConversationContext";
 import { useNavigationView } from "../../../../contexts/Navigationprovider";
-import { unfriendUser, blockUser, unblockUser } from "../api";
+import {
+  unfriendUser,
+  blockUser,
+  unblockUser,
+  checkConnectionStatus,
+  sendFriendRequest,
+} from "../api";
 import { Avatar } from "../../../components/avatart_genrator/Avatar";
 import { colorScheme } from "../../../theme/colorScheme";
 import styles from "../../chat-page/Chat.module.css";
@@ -19,6 +25,31 @@ export default function ProfilePanel() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { setCanShowAppHeader } = useUIContext();
+
+  const [isConnected, setIsConnected] = useState(false);
+  const [checkingConnection, setCheckingConnection] = useState(true);
+
+  useEffect(() => {
+    if (!selectedUserProfile) return;
+
+    let cancelled = false;
+    setCheckingConnection(true);
+
+    checkConnectionStatus(selectedUserProfile._id)
+      .then((res) => {
+        if (!cancelled) setIsConnected(res.connected);
+      })
+      .catch((err) => {
+        if (!cancelled) setError(err.message);
+      })
+      .finally(() => {
+        if (!cancelled) setCheckingConnection(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedUserProfile?._id]);
 
   if (!selectedUserProfile) {
     return (
@@ -39,10 +70,7 @@ export default function ProfilePanel() {
   const isBlocked = blockedUsers.some((u) => u._id === selectedUserProfile._id);
 
   const handleMessage = () => {
-    // 1. Trigger the view change (which triggers the cleanup useEffect in Chat.tsx)
     setActiveView("chats");
-
-    // 2. Wait for the dust to settle, THEN set the ID
     setTimeout(() => {
       setSelectedConversationId(selectedUserProfile._id);
     }, 0);
@@ -60,8 +88,21 @@ export default function ProfilePanel() {
     try {
       await unfriendUser(selectedUserProfile._id);
       setSelectedUserProfile(null);
-      // Typically we'd trigger a re-fetch of connections here, but user can also just see it removed.
-      window.location.reload(); // Quick way to sync state for now
+      window.location.reload();
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSendFriendRequest = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      await sendFriendRequest(selectedUserProfile._id);
+      // Request sent, but not yet an accepted connection — flip button to a "pending" state
+      setIsConnected(false);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -119,7 +160,6 @@ export default function ProfilePanel() {
         color: colorScheme.text,
       }}
     >
-      {/* Mobile back button header */}
       <div
         style={{
           padding: "8px",
@@ -208,22 +248,58 @@ export default function ProfilePanel() {
           >
             Message
           </button>
-          <button
-            onClick={handleUnfriend}
-            disabled={loading}
-            style={{
-              padding: "12px 24px",
-              borderRadius: "8px",
-              border: `1px solid ${colorScheme.border}`,
-              backgroundColor: "transparent",
-              color: colorScheme.text,
-              cursor: loading ? "not-allowed" : "pointer",
-              fontSize: "15px",
-              fontWeight: "bold",
-            }}
-          >
-            Unfriend
-          </button>
+
+          {checkingConnection ? (
+            <button
+              disabled
+              style={{
+                padding: "12px 24px",
+                borderRadius: "8px",
+                border: `1px solid ${colorScheme.border}`,
+                backgroundColor: "transparent",
+                color: colorScheme.textSecondary,
+                fontSize: "15px",
+                fontWeight: "bold",
+              }}
+            >
+              Loading...
+            </button>
+          ) : isConnected ? (
+            <button
+              onClick={handleUnfriend}
+              disabled={loading}
+              style={{
+                padding: "12px 24px",
+                borderRadius: "8px",
+                border: `1px solid ${colorScheme.border}`,
+                backgroundColor: "transparent",
+                color: colorScheme.text,
+                cursor: loading ? "not-allowed" : "pointer",
+                fontSize: "15px",
+                fontWeight: "bold",
+              }}
+            >
+              Unfriend
+            </button>
+          ) : (
+            <button
+              onClick={handleSendFriendRequest}
+              disabled={loading}
+              style={{
+                padding: "12px 24px",
+                borderRadius: "8px",
+                border: `1px solid ${colorScheme.border}`,
+                backgroundColor: "transparent",
+                color: colorScheme.text,
+                cursor: loading ? "not-allowed" : "pointer",
+                fontSize: "15px",
+                fontWeight: "bold",
+              }}
+            >
+              Send Friend Request
+            </button>
+          )}
+
           <button
             onClick={handleBlockToggle}
             disabled={loading}
