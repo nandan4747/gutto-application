@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, Search, Check } from "lucide-react";
 import { colorScheme } from "../../../theme/colorScheme";
 import { useConnectedPeople } from "../../../../contexts/RelationProvider";
@@ -6,6 +6,7 @@ import { useMessages } from "../../../../contexts/MessageProvider";
 import { Avatar } from "../../../components/avatart_genrator/Avatar";
 import { addGroupMembers } from "../Api";
 import styles from "../GroupInfoPanel.module.css";
+import { searchConnections } from "../../freinds-pages/api";
 
 interface Props {
   groupId: string;
@@ -18,12 +19,15 @@ export default function AddGroupMemberPanel({
   currentMembers,
   onClose,
 }: Props) {
-  const { connections } = useConnectedPeople();
+  const SEARCH_DEBOUNCE_MS = 500;
+  const { connections, mergeConnections } = useConnectedPeople();
   const { updateGroupInfo } = useMessages();
   const [searchTerm, setSearchTerm] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [remoteSearching, setRemoteSearching] = useState(false);
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const memberIds = new Set(currentMembers);
   const candidates = Array.from(connections.values()).filter((c) => {
@@ -35,6 +39,32 @@ export default function AddGroupMemberPanel({
       c.fullname.toLowerCase().includes(term)
     );
   });
+
+  useEffect(() => {
+    const term = searchTerm.trim();
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+
+    if (!term || candidates.length > 0) {
+      setRemoteSearching(false);
+      return;
+    }
+
+    searchDebounceRef.current = setTimeout(async () => {
+      setRemoteSearching(true);
+      try {
+        const res = await searchConnections(term);
+        if (res.data?.length) mergeConnections(res.data);
+      } catch (err) {
+        console.error("Friend search failed:", err);
+      } finally {
+        setRemoteSearching(false);
+      }
+    }, SEARCH_DEBOUNCE_MS);
+
+    return () => {
+      if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    };
+  }, [searchTerm]);
 
   const toggle = (id: string) => {
     setSelected((prev) => {
@@ -94,6 +124,14 @@ export default function AddGroupMemberPanel({
       </div>
 
       {error && <p className={styles.errorText}>{error}</p>}
+
+      {
+        /*loading text */ remoteSearching && (
+          <p style={{ color: colorScheme.textSecondary, textAlign: "center" }}>
+            Searching...
+          </p>
+        )
+      }
 
       <div className={styles.list}>
         {candidates.length === 0 && (

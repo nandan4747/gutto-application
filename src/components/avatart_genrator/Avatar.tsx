@@ -45,6 +45,7 @@ export const Avatar = ({ name, size = 48, onClick }: AvatarProps) => {
         fontWeight: "bold",
         flexShrink: 0, // Prevents flexbox from squishing your beautiful circle into an oval
         textTransform: "uppercase",
+        cursor: "pointer",
       }}
       title={name}
       onClick={onClick}

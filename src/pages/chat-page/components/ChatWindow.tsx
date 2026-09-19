@@ -185,7 +185,7 @@ export default function ChatWindow({
     <>
       <div
         style={{
-          padding: 8,
+          padding: 12,
           width: "100%",
           display: "flex",
           background: colorScheme.background,
@@ -218,7 +218,7 @@ export default function ChatWindow({
         </button>
         <Avatar
           name={isResolving ? "?" : displayName}
-          size={50}
+          size={42}
           onClick={async () => {
             let con: any;
             con = getCachedUser(conversationId);
