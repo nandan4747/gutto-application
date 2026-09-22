@@ -11,6 +11,10 @@ import applogo from "../../../assets/applogo.webp";
 import { useToast } from "../../../../contexts/ToastProvider";
 import { usePseudoConnection } from "../../../../contexts/PseudoConnectionContext";
 
+// Add near the top of the file, after imports
+interface NotificationOptionsWithRenotify extends NotificationOptions {
+  renotify?: boolean;
+}
 export function useChatSocket() {
   const socket = useSocket();
   const { user } = useAuth();
@@ -120,7 +124,7 @@ export function useChatSocket() {
             icon: applogo,
             tag: String(payload.from),
             renotify: true,
-          });
+          } as NotificationOptionsWithRenotify);
           notif.onclick = () => {
             window.focus();
             notif.close();
