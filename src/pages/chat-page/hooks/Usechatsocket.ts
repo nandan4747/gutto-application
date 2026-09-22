@@ -40,6 +40,7 @@ export function useChatSocket() {
       // payload: { _id, text, from, type, url, createdAt }
 
       if (String(payload.from) === String(currentUserId)) return;
+
       addIncomingMessage(
         payload.from,
         {
@@ -53,60 +54,87 @@ export function useChatSocket() {
         },
         "dm",
       );
-      if (selectedConversationIdRef.current != String(payload.from)) {
-        let senderDetails = getCachedUser(payload.from);
-        if (!senderDetails) {
-          senderDetails = (await fetchUser(payload.from)) ?? undefined;
-        }
-        if (document.hidden) {
-          let isFlashing = false;
-          const originalTitle = document.title;
 
-          const flashInterval = setInterval(() => {
-            document.title = isFlashing ? "💬 New Message!" : originalTitle;
-            isFlashing = !isFlashing;
-          }, 1000);
+      const isViewingThisChat =
+        selectedConversationIdRef.current === String(payload.from);
 
-          const onVisibilityChange = () => {
-            if (!document.hidden) {
-              clearInterval(flashInterval);
-              document.title = originalTitle;
-              document.removeEventListener(
-                "visibilitychange",
-                onVisibilityChange,
-              );
-            }
-          };
+      // Only notify (toast / system notification / title flash) when the
+      // user isn't actively looking at this exact conversation.
+      if (isViewingThisChat) return;
 
-          document.addEventListener("visibilitychange", onVisibilityChange);
-        } else {
-          showToast({
-            type: "info",
-            isMessage: true,
-            senderName: senderDetails?.fullname,
-            message:
-              payload.type === "text" ? payload.text : "Sent you a file 📁",
-            senderId: payload.from,
-          });
-          if ("Notification" in window) {
-            const title = "New Message!";
-            const options = {
-              body:
-                payload.type === "text" ? payload.text : "Sent you a file 📁",
-              icon: applogo,
-              tag: String(payload.from),
-            };
+      let senderDetails = getCachedUser(payload.from);
+      if (!senderDetails) {
+        senderDetails = (await fetchUser(payload.from)) ?? undefined;
+      }
 
-            if (Notification.permission === "granted") {
-              new Notification(title, options);
-            } else if (Notification.permission !== "denied") {
-              Notification.requestPermission().then((permission) => {
-                if (permission === "granted") {
-                  new Notification(title, options);
-                }
-              });
-            }
+      const notifBody =
+        payload.type === "text" ? payload.text : "Sent you a file 📁";
+
+      // Tab hidden (different tab / minimized / backgrounded) → title flash
+      // AND still fire a system notification, since that's the whole point
+      // of a background notification.
+      if (document.hidden) {
+        let isFlashing = false;
+        const originalTitle = document.title;
+
+        const flashInterval = setInterval(() => {
+          document.title = isFlashing ? "💬 New Message!" : originalTitle;
+          isFlashing = !isFlashing;
+        }, 1000);
+
+        const onVisibilityChange = () => {
+          if (!document.hidden) {
+            clearInterval(flashInterval);
+            document.title = originalTitle;
+            document.removeEventListener(
+              "visibilitychange",
+              onVisibilityChange,
+            );
           }
+        };
+
+        document.addEventListener("visibilitychange", onVisibilityChange);
+      } else {
+        // Tab visible but user is on a different conversation → toast is enough
+        // feedback inside the app; still fire a system notification below too
+        // if you want cross-app visibility (e.g. they're in another window).
+        showToast({
+          type: "info",
+          isMessage: true,
+          senderName: senderDetails?.fullname,
+          message: notifBody,
+          senderId: payload.from,
+        });
+      }
+
+      // System-level notification fires any time the user isn't viewing this
+      // chat — hidden tab or not.
+      if ("Notification" in window) {
+        const title = senderDetails?.fullname
+          ? `${senderDetails.fullname}`
+          : "New Message!";
+
+        const fireNotification = () => {
+          const notif = new Notification(title, {
+            body: notifBody,
+            icon: applogo,
+            tag: String(payload.from),
+            renotify: true,
+          });
+          notif.onclick = () => {
+            window.focus();
+            notif.close();
+          };
+        };
+
+        if (Notification.permission === "granted") {
+          fireNotification();
+        } else if (Notification.permission !== "denied") {
+          Notification.requestPermission().then((permission) => {
+            if (permission === "granted") {
+              fireNotification();
+            }
+          });
         }
       }
     };
