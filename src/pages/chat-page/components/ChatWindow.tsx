@@ -242,7 +242,7 @@ export default function ChatWindow({
           flex: 1,
           overflowY: "auto",
           padding: 16,
-          background: colorScheme.backgroundGradient,
+          background: colorScheme.background,
         }}
       >
         {/* Added optional chaining here so your app doesn't dramatically crash if messageList is temporarily undefined */}

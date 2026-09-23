@@ -169,7 +169,7 @@ export default function GroupChatBubble({ message }: Props) {
             fontWeight: 600,
             color: colorScheme.textSecondary,
             marginBottom: 2,
-            marginLeft: 12,
+            marginLeft: 2,
             display: "flex",
             gap: "5px",
             alignItems: "center",

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Plus } from "lucide-react";
 import { useMessages } from "../../../contexts/MessageProvider";
 import { usePseudoConnection } from "../../../contexts/PseudoConnectionContext";
@@ -27,11 +27,25 @@ export default function GroupChatPanel({
 
   const { setCanShowAppHeader } = useUIContext();
 
+  const hasFetchedRef = useRef(false);
+
   useEffect(() => {
     setCanShowAppHeader(true);
   }, []);
 
+  const groupEntries = Object.entries(state).filter(
+    ([, entry]) => entry.type === "group",
+  );
+
   useEffect(() => {
+    // Already have groups in state, or we've already fired the request
+    // once this mount — don't hit the API again.
+    if (groupEntries.length > 0 || hasFetchedRef.current) {
+      setLoading(false);
+      return;
+    }
+
+    hasFetchedRef.current = true;
     let cancelled = false;
 
     (async () => {
@@ -44,7 +58,12 @@ export default function GroupChatPanel({
 
         setError(null);
       } catch (err: any) {
-        if (!cancelled) setError(err.message);
+        if (!cancelled) {
+          setError(err.message);
+          // Let a genuine failure be retried on a future mount instead of
+          // permanently locking the panel out.
+          hasFetchedRef.current = false;
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -53,11 +72,7 @@ export default function GroupChatPanel({
     return () => {
       cancelled = true;
     };
-  }, [hydrateConversations, mergeUsers]);
-
-  const groupEntries = Object.entries(state).filter(
-    ([, entry]) => entry.type === "group",
-  );
+  }, [groupEntries.length, hydrateConversations, mergeUsers]);
 
   if (isCreating) {
     return (

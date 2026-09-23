@@ -150,7 +150,7 @@ export default function ProfileSettingsPanel() {
 
   return (
     <div
-      style={{ background: colorScheme.backgroundGradient }}
+      style={{ background: colorScheme.background }}
       className={styles.container}
     >
       <div className={styles.profileSection}>
