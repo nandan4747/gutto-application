@@ -6,6 +6,7 @@ import { useUIContext } from "../../../contexts/UIContextProvider";
 import { Avatar } from "../avatart_genrator/Avatar";
 import { useAuth } from "../../../contexts/AuthProvider";
 import { colorScheme } from "../../theme/colorScheme";
+import { useConversation } from "../../../contexts/ConversationContext";
 
 const TABS = [
   { id: "chats", label: "Chats", Icon: MessageCircle, needAvatar: false },
@@ -18,6 +19,7 @@ const MobileTabs: React.FC = () => {
   const { activeView, setActiveView } = useNavigationView();
   const { canShowDesktopHeader, canShowTabs } = useUIContext();
   const { user } = useAuth();
+  const { setSelectedConversationId } = useConversation();
   const currentUser = (user as any)?.fullname || "Un-known";
 
   if (!canShowDesktopHeader || !canShowTabs) {
@@ -38,7 +40,10 @@ const MobileTabs: React.FC = () => {
         return (
           <button
             key={id}
-            onClick={() => setActiveView(id)}
+            onClick={() => {
+              setActiveView(id);
+              setSelectedConversationId(null);
+            }}
             className={`${styles.tabButton} ${isActive ? styles.active : ""}`}
             aria-label={label}
           >

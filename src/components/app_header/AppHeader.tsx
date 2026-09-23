@@ -10,11 +10,13 @@ import { Avatar } from "../avatart_genrator/Avatar";
 import { useAuth } from "../../../contexts/AuthProvider";
 import { ThemeToggleButton } from "../toggle_btn/ThemeToggleButton";
 import voiceLogo from "../../assets/logo_voice_.png";
+import { useConversation } from "../../../contexts/ConversationContext";
 
 const AppHeader: React.FC = () => {
   const { activeView, setActiveView } = useNavigationView();
   const { canShowDesktopHeader } = useUIContext();
   const { user } = useAuth();
+  const { setSelectedConversationId } = useConversation();
 
   const currentUser = (user as any)?.fullname || "Un-known";
   const navItemStyle = (view: typeof activeView) => ({
@@ -45,7 +47,10 @@ const AppHeader: React.FC = () => {
       <div
         className={styles.navActions}
         style={navItemStyle("chats")}
-        onClick={() => setActiveView("chats")}
+        onClick={() => {
+          setActiveView("chats");
+          setSelectedConversationId(null);
+        }}
       >
         <MessageCircle
           className={styles.navOptions}
@@ -87,7 +92,10 @@ const AppHeader: React.FC = () => {
       <div
         className={styles.navActions}
         style={navItemStyle("groups")}
-        onClick={() => setActiveView("groups")}
+        onClick={() => {
+          setActiveView("groups");
+          setSelectedConversationId(null);
+        }}
       >
         <Users
           className={styles.navOptions}

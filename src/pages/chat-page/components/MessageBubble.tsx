@@ -8,7 +8,7 @@ import {
   deleteFileMessageApi,
 } from "../../../api/globalApiFetch";
 import MessageContent from "./MessageContent";
-
+import { useToast } from "../../../../contexts/ToastProvider";
 interface Props {
   message: StoredMessage;
 }
@@ -26,7 +26,7 @@ export default function MessageBubble({ message }: Props) {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const bubbleRef = useRef<HTMLDivElement | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
-
+  const { showToast } = useToast();
   const openMenuAt = (x: number, y: number) => {
     if (isDeleted) return;
     setMenuPos({ x, y });
@@ -94,6 +94,10 @@ export default function MessageBubble({ message }: Props) {
       }
     } catch (error: any) {
       console.error("Delete failed:", error.message);
+      showToast({
+        type: "error",
+        message: error.message,
+      });
     } finally {
       setIsDeleting(false);
       setMenuPos(null);
@@ -143,6 +147,9 @@ export default function MessageBubble({ message }: Props) {
           opacity: message.status === "sending" || isDeleting ? 0.6 : 1,
           userSelect: "none",
           cursor: !isDeleted ? "pointer" : "default",
+          wordBreak: "break-word",
+          overflowWrap: "anywhere",
+          whiteSpace: "pre-wrap",
         }}
       >
         <MessageContent message={message} isDeleted={isDeleted} />

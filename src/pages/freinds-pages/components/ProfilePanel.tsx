@@ -12,6 +12,7 @@ import { Avatar } from "../../../components/avatart_genrator/Avatar";
 import { colorScheme } from "../../../theme/colorScheme";
 import styles from "../../chat-page/Chat.module.css";
 import { useUIContext } from "../../../../contexts/UIContextProvider";
+import { screen } from "../../../../utils/scope";
 
 export default function ProfilePanel() {
   const {
@@ -231,7 +232,13 @@ export default function ProfilePanel() {
           <div style={{ color: "#ff453a", marginBottom: "20px" }}>{error}</div>
         )}
 
-        <div style={{ display: "flex", gap: "16px" }}>
+        <div
+          style={{
+            display: "flex",
+            gap: "16px",
+            flexDirection: screen.isMobile ? "column" : "row",
+          }}
+        >
           <button
             onClick={handleMessage}
             disabled={loading}
