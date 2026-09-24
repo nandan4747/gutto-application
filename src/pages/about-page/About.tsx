@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ShieldAlert, Zap, Database, Cloud } from "lucide-react";
+// Swapped ShieldAlert for ShieldCheck because we are SECURE now (mostly)
+import { ShieldCheck, Zap, Database, Cloud } from "lucide-react";
 import { GradientBackground } from "../../components/background/GradientBackground";
 import { colorScheme } from "../../theme/colorScheme";
 import { useUIContext } from "../../../contexts/UIContextProvider";
@@ -95,22 +96,24 @@ export default function About() {
           </div>
         </section>
 
-        {/* Slide 3: Warning & Get Started */}
+        {/* Slide 3: The "We Have Encryption Now" Flex */}
         <section className={styles.snapSection}>
           <div className={styles.contentMax}>
             <div className={styles.warningBox}>
-              <ShieldAlert
+              <ShieldCheck
                 size={36}
-                color="#ff4d4f"
+                color="#00ED64"
                 className={styles.warningIcon}
               />
               <div className={styles.warningText}>
-                <h3>Portfolio Security Notice</h3>
+                <h3>Military-Grade(ish) Security</h3>
                 <p>
-                  As this is a portfolio showcase, End-to-End Encryption is not
-                  implemented. Please do not share sensitive personal
-                  information, passwords, or financial details over this
-                  network.
+                  We recently upgraded to{" "}
+                  <strong>AES-256-GCM Server-Side Encryption!</strong>
+                  Is it WhatsApp-level, NSA-proof, End-to-End encryption? No.
+                  But is it a hell of a lot better than storing your texts in
+                  plain text? Absolutely. Your messages are now locked down at
+                  rest. (Still, maybe don't text your bank password here).
                 </p>
               </div>
             </div>

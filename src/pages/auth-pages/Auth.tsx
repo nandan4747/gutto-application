@@ -9,6 +9,10 @@ import { isUserAlreadyVisted } from "../../../utils/freshUser";
 import { useUIContext } from "../../../contexts/UIContextProvider";
 import TypewriterText from "../../components/animated/TypewriterText";
 import { useToast } from "../../../contexts/ToastProvider";
+import purpleBgPhone from "../../assets/layered-steps-haikei-vertical.svg";
+import purpleBg from "../../assets/layered-steps-haikei.svg";
+
+import { screen } from "../../../utils/scope";
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -24,6 +28,7 @@ export default function Auth() {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const bgArtUrl = screen.isMobile ? purpleBgPhone : purpleBg;
 
   const { setCanShowTabs, setCanShowDesktopHeader } = useUIContext();
 
@@ -105,60 +110,79 @@ export default function Auth() {
   };
 
   return (
-    <div className={styles.bg}>
-      <div className={styles.typewriter}>
-        <TypewriterText
-          text="Let's break the silence"
+    <div className={styles.mainContainer}>
+      <img src={bgArtUrl} alt="" aria-hidden="true" className={styles.bgArt} />
+      <div className={styles.bg}>
+        <div className={styles.typewriter}>
+          <TypewriterText
+            text="Let's break the silence"
+            style={{
+              color: "white",
+              fontSize: "xx-large",
+              textAlign: "center",
+            }}
+          />
+        </div>
+        <div
           style={{
-            color: "white",
-            fontSize: "xx-large",
-            textAlign: "center",
+            color: colorScheme.text,
           }}
-        />
-      </div>
-      <div
-        style={{
-          color: colorScheme.text,
-        }}
-        className={styles.authPage}
-      >
-        <div className={styles.authCard}>
-          <div className={styles.authToggle}>
-            <button
-              type="button"
-              style={{
-                backgroundColor:
-                  mode === "login" ? colorScheme.primary : "#0605050e",
-                color: mode === "login" ? colorScheme.text : colorScheme.text,
-              }}
-              className={mode === "login" ? styles.active : ""}
-              onClick={() => {
-                setMode("login");
-                resetMessages();
-              }}
-            >
-              Login
-            </button>
-            <button
-              style={{
-                backgroundColor:
-                  mode === "register" ? colorScheme.primary : "#0605050e",
-                color:
-                  mode === "register" ? colorScheme.text : colorScheme.text,
-              }}
-              type="button"
-              className={mode === "register" ? styles.active : ""}
-              onClick={() => {
-                setMode("register");
-                resetMessages();
-              }}
-            >
-              Register
-            </button>
-          </div>
+          className={styles.authPage}
+        >
+          <div className={styles.authCard}>
+            <div className={styles.authToggle}>
+              <button
+                type="button"
+                style={{
+                  backgroundColor:
+                    mode === "login" ? colorScheme.primary : "#0605050e",
+                  color: mode === "login" ? colorScheme.text : colorScheme.text,
+                }}
+                className={mode === "login" ? styles.active : ""}
+                onClick={() => {
+                  setMode("login");
+                  resetMessages();
+                }}
+              >
+                Login
+              </button>
+              <button
+                style={{
+                  backgroundColor:
+                    mode === "register" ? colorScheme.primary : "#0605050e",
+                  color:
+                    mode === "register" ? colorScheme.text : colorScheme.text,
+                }}
+                type="button"
+                className={mode === "register" ? styles.active : ""}
+                onClick={() => {
+                  setMode("register");
+                  resetMessages();
+                }}
+              >
+                Register
+              </button>
+            </div>
 
-          <form className={styles.authForm} onSubmit={handleSubmit}>
-            {mode === "register" && (
+            <form className={styles.authForm} onSubmit={handleSubmit}>
+              {mode === "register" && (
+                <div className={styles.formField}>
+                  <input
+                    style={{
+                      backgroundColor: colorScheme.glass,
+                      color: colorScheme.text,
+                      borderColor: colorScheme.glassBorder,
+                    }}
+                    id="fullname"
+                    type="text"
+                    value={fullname}
+                    onChange={(event) => setFullname(event.target.value)}
+                    placeholder="Your full name"
+                    required
+                  />
+                </div>
+              )}
+
               <div className={styles.formField}>
                 <input
                   style={{
@@ -166,145 +190,129 @@ export default function Auth() {
                     color: colorScheme.text,
                     borderColor: colorScheme.glassBorder,
                   }}
-                  id="fullname"
+                  id="username"
                   type="text"
-                  value={fullname}
-                  onChange={(event) => setFullname(event.target.value)}
-                  placeholder="Your full name"
+                  value={username}
+                  onChange={(event) => setUsername(event.target.value)}
+                  placeholder="Enter username"
                   required
                 />
               </div>
-            )}
 
-            <div className={styles.formField}>
-              <input
-                style={{
-                  backgroundColor: colorScheme.glass,
-                  color: colorScheme.text,
-                  borderColor: colorScheme.glassBorder,
-                }}
-                id="username"
-                type="text"
-                value={username}
-                onChange={(event) => setUsername(event.target.value)}
-                placeholder="Enter username"
-                required
-              />
-            </div>
+              <div className={styles.formField}>
+                <input
+                  style={{
+                    backgroundColor: colorScheme.glass,
+                    color: colorScheme.text,
+                    borderColor: colorScheme.glassBorder,
+                  }}
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  placeholder="Enter password"
+                  required
+                />
+              </div>
 
-            <div className={styles.formField}>
-              <input
-                style={{
-                  backgroundColor: colorScheme.glass,
-                  color: colorScheme.text,
-                  borderColor: colorScheme.glassBorder,
-                }}
-                id="password"
-                type="password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                placeholder="Enter password"
-                required
-              />
-            </div>
+              {mode === "register" && (
+                <div
+                  style={{
+                    backgroundColor: colorScheme.glass,
+                    borderColor: colorScheme.glassBorder,
+                  }}
+                  className={`${styles.formField} ${styles.accountTypeGroup}`}
+                >
+                  <span>Account type</span>
 
-            {mode === "register" && (
+                  <div className={styles.accountToggle}>
+                    <button
+                      type="button"
+                      style={{
+                        backgroundColor:
+                          accountType === "private"
+                            ? colorScheme.secondary
+                            : "transparent",
+                        color:
+                          accountType === "private"
+                            ? "#ffffff"
+                            : colorScheme.textSecondary,
+                      }}
+                      onClick={() => setAccountType("private")}
+                    >
+                      Private
+                    </button>
+                    <button
+                      type="button"
+                      style={{
+                        backgroundColor:
+                          accountType === "public"
+                            ? colorScheme.secondary
+                            : "transparent",
+                        color:
+                          accountType === "public"
+                            ? "#ffffff"
+                            : colorScheme.textSecondary,
+                      }}
+                      onClick={() => setAccountType("public")}
+                    >
+                      Public
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <button
+                className={styles.submitButton}
+                style={{ backgroundColor: colorScheme.primary }}
+                type="submit"
+                disabled={isSubmitting}
+              >
+                {isSubmitting
+                  ? "Submitting..."
+                  : mode === "login"
+                    ? "Login"
+                    : "Register"}
+              </button>
+
+              {message && <p className={styles.successMessage}>{message}</p>}
+              {error && <p className={styles.errorMessage}>{error}</p>}
+            </form>
+            {mode === "login" && (
               <div
                 style={{
-                  backgroundColor: colorScheme.glass,
-                  borderColor: colorScheme.glassBorder,
+                  display: "flex",
+                  padding: "5px",
+                  marginTop: "10px",
                 }}
-                className={`${styles.formField} ${styles.accountTypeGroup}`}
               >
-                <span>Account type</span>
-
-                <div className={styles.accountToggle}>
-                  <button
-                    type="button"
-                    style={{
-                      backgroundColor:
-                        accountType === "private"
-                          ? colorScheme.secondary
-                          : "transparent",
-                      color:
-                        accountType === "private"
-                          ? "#ffffff"
-                          : colorScheme.textSecondary,
-                    }}
-                    onClick={() => setAccountType("private")}
-                  >
-                    Private
-                  </button>
-                  <button
-                    type="button"
-                    style={{
-                      backgroundColor:
-                        accountType === "public"
-                          ? colorScheme.secondary
-                          : "transparent",
-                      color:
-                        accountType === "public"
-                          ? "#ffffff"
-                          : colorScheme.textSecondary,
-                    }}
-                    onClick={() => setAccountType("public")}
-                  >
-                    Public
-                  </button>
-                </div>
+                <TypewriterText text="No account ?" />{" "}
+                <p
+                  style={{
+                    marginLeft: "10px",
+                    cursor: "pointer",
+                    color: colorScheme.primary,
+                  }}
+                  onClick={() => {
+                    setMode("register");
+                  }}
+                >
+                  Register
+                </p>
               </div>
             )}
-
-            <button
-              className={styles.submitButton}
-              style={{ backgroundColor: colorScheme.primary }}
-              type="submit"
-              disabled={isSubmitting}
-            >
-              {isSubmitting
-                ? "Submitting..."
-                : mode === "login"
-                  ? "Login"
-                  : "Register"}
-            </button>
-
-            {message && <p className={styles.successMessage}>{message}</p>}
-            {error && <p className={styles.errorMessage}>{error}</p>}
-          </form>
-          {mode === "login" && (
-            <div
-              style={{
-                display: "flex",
-                padding: "5px",
-                marginTop: "10px",
-              }}
-            >
-              <TypewriterText text="No account ?" />{" "}
-              <p
-                style={{
-                  marginLeft: "10px",
-                  cursor: "pointer",
-                  color: colorScheme.primary,
-                }}
-                onClick={() => {
-                  setMode("register");
-                }}
-              >
-                Register
-              </p>
-            </div>
-          )}
+          </div>
         </div>
-      </div>
-      <div>
-        <p
-          onClick={() => {
-            navigate("/about");
-          }}
-          style={{ color: "white", cursor: "pointer" }}
-        >
-          About
-        </p>
+        <div>
+          <p
+            onClick={() => {
+              navigate("/about");
+            }}
+            style={{ color: "white", cursor: "pointer" }}
+          >
+            About
+          </p>
+        </div>
       </div>
     </div>
   );

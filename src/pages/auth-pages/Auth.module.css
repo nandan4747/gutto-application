@@ -1,9 +1,20 @@
+.mainContainer {
+  height: auto;
+}
 .authPage {
   display: flex;
   align-items: center;
   justify-content: center;
   min-width: 90%;
   height: auto;
+}
+.bgArt {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
 }
 
 .typewriter {
@@ -17,13 +28,14 @@
   justify-content: center;
   height: 100%;
   align-items: center;
-  background-image: url("../../assets/layered-steps-haikei.svg");
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: center;
-  isolation: isolate;
   max-height: 100%;
   box-sizing: border-box;
+  z-index: 1;
+  position: absolute;
+  left: 0;
+  top: 0;
+
+  width: 100%;
 }
 .authCard {
   width: min(460px, 100%);
@@ -44,7 +56,8 @@
   transform: translateZ(0);
   will-change: backdrop-filter;
 
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-left: 1px solid var(--primary);
+
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
 }
 
@@ -186,6 +199,6 @@
 
 @media (max-width: 600px) {
   .bg {
-    background-image: url("../../assets/layered-steps-haikei-vertical.svg");
+    min-width: auto;
   }
 }
